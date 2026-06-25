@@ -3,7 +3,10 @@ const pool = require('../config/db');
 exports.getServices = async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, name, duration_minutes, price FROM services ORDER BY id'
+      `SELECT id, name, duration_minutes, price
+       FROM services
+       WHERE is_active = true
+       ORDER BY id`
     );
 
     res.json({ services: result.rows });

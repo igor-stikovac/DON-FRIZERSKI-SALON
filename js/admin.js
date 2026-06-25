@@ -3,29 +3,25 @@ const API_URL = 'http://localhost:5000/api';
 const token = localStorage.getItem('don_token');
 const user = JSON.parse(localStorage.getItem('don_user') || 'null');
 
-const adminDate = document.getElementById('adminDate');
-const manualDate = document.getElementById('manualDate');
-const manualService = document.getElementById('manualService');
+const adminMonthGrid = document.getElementById('adminMonthGrid');
+const adminMonthTitle = document.getElementById('adminMonthTitle');
+const selectedDayTitle = document.getElementById('selectedDayTitle');
 const adminAppointmentsList = document.getElementById('adminAppointmentsList');
+const manualService = document.getElementById('manualService');
 const adminMessage = document.getElementById('adminMessage');
+const adminServicesList = document.getElementById('adminServicesList');
+const adminServiceForm = document.getElementById('adminServiceForm');
+const editService = document.getElementById('editService');
+const editAppointmentForm = document.getElementById('editAppointmentForm');
+const editAppointmentBox = document.getElementById('editAppointmentBox');
+const statBookedToday = document.getElementById('statBookedToday');
+const statCancelledToday = document.getElementById('statCancelledToday');
+const statRevenueToday = document.getElementById('statRevenueToday');
+const statBlocksToday = document.getElementById('statBlocksToday');
 
-function todayForInput() {
-  const today = new Date();
-
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
-}
-
-function showAdminMessage(text, type = 'success') {
-  adminMessage.textContent = text;
-  adminMessage.className =
-    type === 'error'
-      ? 'auth-message error'
-      : 'auth-message success';
-}
+let adminCalendarStats = {};
+let currentMonth = new Date();
+let selectedDate = formatDateForApi(new Date());
 
 function checkAdminAccess() {
   if (!token || !user || user.role !== 'admin') {
@@ -34,40 +30,153 @@ function checkAdminAccess() {
   }
 }
 
+function formatDateForApi(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateForDisplay(dateString) {
+  const date = new Date(`${dateString}T00:00:00`);
+
+  return date.toLocaleDateString('sr-RS', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function showAdminMessage(text, type = 'success') {
+  adminMessage.textContent = text;
+  adminMessage.className =
+    type === 'error'
+      ? 'auth-message error'
+      : 'auth-message success';
+
+  setTimeout(() => {
+    adminMessage.textContent = '';
+  }, 3500);
+}
+
+function renderAdminCalendar() {
+  adminMonthGrid.innerHTML = '';
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const monthTitle = currentMonth.toLocaleDateString('sr-RS', {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  adminMonthTitle.textContent =
+    monthTitle.charAt(0).toUpperCase() + monthTitle.slice(1);
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  let startOffset = firstDay.getDay() - 1;
+  if (startOffset < 0) startOffset = 6;
+
+  for (let i = 0; i < startOffset; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'admin-calendar-day empty';
+    adminMonthGrid.appendChild(empty);
+  }
+
+  for (let day = 1; day <= lastDay.getDate(); day++) {
+    const date = new Date(year, month, day);
+    const dateForApi = formatDateForApi(date);
+
+    const dayButton = document.createElement('button');
+    dayButton.type = 'button';
+    dayButton.className = 'admin-calendar-day';
+    dayButton.dataset.date = dateForApi;
+
+    if (dateForApi === selectedDate) {
+      dayButton.classList.add('selected');
+    }
+
+    const today = formatDateForApi(new Date());
+
+    if (dateForApi === today) {
+      dayButton.classList.add('today');
+    }
+
+    const dayOfWeek = date.getDay();
+
+    if (dayOfWeek === 0) {
+      dayButton.classList.add('closed-day');
+    }
+
+    dayButton.innerHTML = `
+      <strong>${day}</strong>
+      <span>${dayOfWeek === 0 ? 'Neradno' : 'Radni dan'}</span>
+    `;
+
+    dayButton.addEventListener('click', () => {
+      selectedDate = dateForApi;
+      renderAdminCalendar();
+      loadAdminAppointments();
+    });
+
+    adminMonthGrid.appendChild(dayButton);
+  }
+
+  selectedDayTitle.textContent = formatDateForDisplay(selectedDate);
+  loadAdminStats(year, month + 1);
+}
+
 async function loadAdminServices() {
   try {
     const response = await fetch(`${API_URL}/services`);
     const data = await response.json();
 
-    manualService.innerHTML = '<option value="">Izaberi uslugu</option>';
+    const serviceSelects = [
+      manualService,
+      editService
+    ].filter(Boolean);
+
+    serviceSelects.forEach(select => {
+      select.innerHTML = '<option value="">Izaberi uslugu</option>';
+    });
 
     data.services.forEach(service => {
-      const option = document.createElement('option');
+      serviceSelects.forEach(select => {
+        const option = document.createElement('option');
 
-      option.value = service.id;
-      option.textContent =
-        `${service.name} - ${service.duration_minutes} min - ${service.price} RSD`;
+        option.value = service.id;
+        option.textContent =
+          `${service.name} - ${service.duration_minutes} min - ${service.price} RSD`;
 
-      manualService.appendChild(option);
+        select.appendChild(option);
+      });
     });
 
   } catch (error) {
-    manualService.innerHTML =
-      '<option value="">Greška pri učitavanju usluga</option>';
+    if (manualService) {
+      manualService.innerHTML =
+        '<option value="">Greška pri učitavanju usluga</option>';
+    }
+
+    if (editService) {
+      editService.innerHTML =
+        '<option value="">Greška pri učitavanju usluga</option>';
+    }
   }
 }
 
 async function loadAdminAppointments() {
-  const date = adminDate.value;
-
-  if (!date) return;
+  selectedDayTitle.textContent = formatDateForDisplay(selectedDate);
 
   adminAppointmentsList.innerHTML =
-    '<p>Učitavanje termina...</p>';
+    '<p class="admin-empty">Učitavanje termina...</p>';
 
   try {
     const response = await fetch(
-      `${API_URL}/admin/appointments?date=${date}`,
+      `${API_URL}/admin/appointments?date=${selectedDate}`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -79,19 +188,48 @@ async function loadAdminAppointments() {
 
     if (!response.ok) {
       adminAppointmentsList.innerHTML =
-        `<p>${data.message || 'Greška pri učitavanju termina.'}</p>`;
+        `<p class="admin-empty">${data.message || 'Greška pri učitavanju termina.'}</p>`;
       return;
     }
 
     const appointments = data.appointments || [];
+    const blocks = data.blocks || [];
 
-    if (appointments.length === 0) {
+    adminAppointmentsList.innerHTML = '';
+
+    if (appointments.length === 0 && blocks.length === 0) {
       adminAppointmentsList.innerHTML =
-        '<p>Za izabrani dan nema zakazanih termina.</p>';
+        '<p class="admin-empty">Za ovaj dan nema termina ni blokada.</p>';
       return;
     }
 
-    adminAppointmentsList.innerHTML = '';
+    blocks.forEach(block => {
+      const card = document.createElement('div');
+      card.className = 'admin-appointment-card blocked';
+
+      card.innerHTML = `
+        <div class="admin-appointment-main">
+          <div>
+            <h3>${block.start_time.slice(0, 5)} - ${block.end_time.slice(0, 5)}</h3>
+            <p>Blokirano vreme</p>
+          </div>
+
+          <span class="admin-status blocked">
+            Blokirano
+          </span>
+        </div>
+
+        <div class="admin-appointment-info">
+          <p><strong>Razlog:</strong> ${block.reason || '-'}</p>
+        </div>
+
+        <button class="btn btn-dark admin-delete-block-btn" data-id="${block.id}">
+          Ukloni blokadu
+        </button>
+      `;
+
+      adminAppointmentsList.appendChild(card);
+    });
 
     appointments.forEach(app => {
       const customerName =
@@ -114,7 +252,6 @@ async function loadAdminAppointments() {
 
       card.innerHTML = `
         <div class="admin-appointment-main">
-
           <div>
             <h3>${app.start_time.slice(0, 5)} - ${app.end_time.slice(0, 5)}</h3>
             <p>${app.service_name}</p>
@@ -123,7 +260,6 @@ async function loadAdminAppointments() {
           <span class="admin-status ${app.status}">
             ${statusText}
           </span>
-
         </div>
 
         <div class="admin-appointment-info">
@@ -140,9 +276,17 @@ async function loadAdminAppointments() {
 
         ${
           app.status === 'booked'
-            ? `<button class="btn btn-dark admin-cancel-btn" data-id="${app.id}">
-                Otkaži termin
-              </button>`
+            ? `
+              <div class="admin-card-actions">
+                <button class="btn btn-gold admin-edit-btn" data-id="${app.id}">
+                  Izmeni
+                </button>
+
+                <button class="btn btn-dark admin-cancel-btn" data-id="${app.id}">
+                  Otkaži termin
+                </button>
+              </div>
+            `
             : ''
         }
       `;
@@ -152,14 +296,31 @@ async function loadAdminAppointments() {
 
     document.querySelectorAll('.admin-cancel-btn').forEach(button => {
       button.addEventListener('click', async () => {
-        const appointmentId = button.dataset.id;
-        await cancelAdminAppointment(appointmentId);
+        await cancelAdminAppointment(button.dataset.id);
+      });
+    });
+
+    document.querySelectorAll('.admin-edit-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const appointment = appointments.find(app =>
+          String(app.id) === String(button.dataset.id)
+        );
+
+        if (appointment) {
+          openEditAppointmentForm(appointment);
+        }
+      });
+    });
+
+    document.querySelectorAll('.admin-delete-block-btn').forEach(button => {
+      button.addEventListener('click', async () => {
+        await deleteBlockedSlot(button.dataset.id);
       });
     });
 
   } catch (error) {
     adminAppointmentsList.innerHTML =
-      '<p>Greška pri učitavanju termina.</p>';
+      '<p class="admin-empty">Greška pri učitavanju termina.</p>';
   }
 }
 
@@ -170,30 +331,59 @@ async function cancelAdminAppointment(id) {
 
   if (!confirmed) return;
 
-  try {
-    const response = await fetch(
-      `${API_URL}/admin/appointments/${id}/cancel`,
-      {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+  const response = await fetch(
+    `${API_URL}/admin/appointments/${id}/cancel`,
+    {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.message || 'Greška pri otkazivanju termina.');
-      return;
     }
+  );
 
-    alert(data.message || 'Termin je otkazan.');
-    loadAdminAppointments();
+  const data = await response.json();
 
-  } catch (error) {
-    alert('Greška pri otkazivanju termina.');
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri otkazivanju termina.',
+      'error'
+    );
   }
+
+  showAdminMessage(data.message || 'Termin je otkazan.');
+  renderAdminCalendar();
+  loadAdminAppointments();
+}
+
+async function deleteBlockedSlot(id) {
+  const confirmed = confirm(
+    'Da li želite da uklonite ovu blokadu?'
+  );
+
+  if (!confirmed) return;
+
+  const response = await fetch(
+    `${API_URL}/admin/blocks/${id}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri uklanjanju blokade.',
+      'error'
+    );
+  }
+
+  showAdminMessage(data.message || 'Blokada je uklonjena.');
+  renderAdminCalendar();
+  loadAdminAppointments();
 }
 
 document
@@ -205,52 +395,109 @@ document
       customerName: document.getElementById('manualCustomerName').value.trim(),
       customerPhone: document.getElementById('manualCustomerPhone').value.trim(),
       serviceId: manualService.value,
-      date: manualDate.value,
+      date: selectedDate,
       time: document.getElementById('manualTime').value,
       note: document.getElementById('manualNote').value.trim()
     };
 
-    try {
-      const response = await fetch(
-        `${API_URL}/admin/appointments/manual`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return showAdminMessage(
-          data.message || 'Greška pri dodavanju termina.',
-          'error'
-        );
+    const response = await fetch(
+      `${API_URL}/admin/appointments/manual`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
       }
+    );
 
-      showAdminMessage('Termin je uspešno dodat.');
+    const data = await response.json();
 
-      document.getElementById('manualAppointmentForm').reset();
-
-      manualDate.value = adminDate.value;
-
-      loadAdminAppointments();
-
-    } catch (error) {
-      showAdminMessage(
-        'Backend nije pokrenut ili API nije dostupan.',
+    if (!response.ok) {
+      return showAdminMessage(
+        data.message || 'Greška pri dodavanju termina.',
         'error'
       );
     }
+
+    showAdminMessage('Termin je uspešno dodat.');
+
+    document.getElementById('manualAppointmentForm').reset();
+    
+    renderAdminCalendar();
+    loadAdminAppointments();
   });
 
-adminDate?.addEventListener('change', () => {
-  manualDate.value = adminDate.value;
-  loadAdminAppointments();
+document
+  .getElementById('blockTimeForm')
+  ?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const payload = {
+      date: selectedDate,
+      startTime: document.getElementById('blockStartTime').value,
+      endTime: document.getElementById('blockEndTime').value,
+      reason: document.getElementById('blockReason').value.trim()
+    };
+
+    const response = await fetch(
+      `${API_URL}/admin/blocks`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return showAdminMessage(
+        data.message || 'Greška pri blokiranju vremena.',
+        'error'
+      );
+    }
+
+    showAdminMessage('Vreme je uspešno blokirano.');
+
+    document.getElementById('blockTimeForm').reset();
+
+    renderAdminCalendar();
+    loadAdminAppointments();
+  });
+
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.dataset.adminTab;
+
+    document.querySelectorAll('.admin-tab').forEach(t => {
+      t.classList.remove('active');
+    });
+
+    document.querySelectorAll('.admin-tab-content').forEach(content => {
+      content.classList.remove('active');
+    });
+
+    tab.classList.add('active');
+
+    document
+      .getElementById(`${tabName}Tab`)
+      .classList.add('active');
+  });
+});
+
+document.getElementById('prevMonthBtn')?.addEventListener('click', () => {
+  currentMonth.setMonth(currentMonth.getMonth() - 1);
+  renderAdminCalendar();
+});
+
+document.getElementById('nextMonthBtn')?.addEventListener('click', () => {
+  currentMonth.setMonth(currentMonth.getMonth() + 1);
+  renderAdminCalendar();
 });
 
 document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
@@ -260,10 +507,332 @@ document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
   window.location.href = 'index.html';
 });
 
+async function loadAdminServicesPanel() {
+  if (!adminServicesList) return;
+
+  adminServicesList.innerHTML = '<p class="admin-empty">Učitavanje usluga...</p>';
+
+  try {
+    const response = await fetch(`${API_URL}/admin/services`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      adminServicesList.innerHTML =
+        `<p class="admin-empty">${data.message || 'Greška pri učitavanju usluga.'}</p>`;
+      return;
+    }
+
+    adminServicesList.innerHTML = '';
+
+    data.services.forEach(service => {
+      const card = document.createElement('div');
+      card.className = 'admin-service-card';
+
+      card.innerHTML = `
+        <div>
+          <h3>${service.name}</h3>
+          <p>${service.duration_minutes} min | ${service.price} RSD</p>
+          <span class="${service.is_active ? 'service-active' : 'service-inactive'}">
+            ${service.is_active ? 'Aktivna' : 'Neaktivna'}
+          </span>
+        </div>
+
+        <div class="admin-service-actions">
+          <button class="btn btn-gold edit-service-btn" data-id="${service.id}">
+            Izmeni
+          </button>
+
+          <button class="btn btn-dark delete-service-btn" data-id="${service.id}">
+            Deaktiviraj
+          </button>
+        </div>
+      `;
+
+      adminServicesList.appendChild(card);
+
+      card.querySelector('.edit-service-btn').addEventListener('click', () => {
+        document.getElementById('adminServiceId').value = service.id;
+        document.getElementById('adminServiceName').value = service.name;
+        document.getElementById('adminServiceDuration').value = service.duration_minutes;
+        document.getElementById('adminServicePrice').value = service.price;
+      });
+
+      card.querySelector('.delete-service-btn').addEventListener('click', async () => {
+        await deactivateService(service.id);
+      });
+    });
+
+  } catch (error) {
+    adminServicesList.innerHTML =
+      '<p class="admin-empty">Greška pri učitavanju usluga.</p>';
+  }
+}
+
+async function deactivateService(id) {
+  const confirmed = confirm('Da li želiš da deaktiviraš ovu uslugu?');
+
+  if (!confirmed) return;
+
+  const response = await fetch(`${API_URL}/admin/services/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri deaktiviranju usluge.',
+      'error'
+    );
+  }
+
+  showAdminMessage('Usluga je deaktivirana.');
+
+  loadAdminServicesPanel();
+  loadAdminServices();
+}
+
+adminServiceForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const serviceId = document.getElementById('adminServiceId').value;
+
+  const payload = {
+    name: document.getElementById('adminServiceName').value.trim(),
+    durationMinutes: Number(document.getElementById('adminServiceDuration').value),
+    price: Number(document.getElementById('adminServicePrice').value),
+    isActive: true
+  };
+
+  const url = serviceId
+    ? `${API_URL}/admin/services/${serviceId}`
+    : `${API_URL}/admin/services`;
+
+  const method = serviceId ? 'PUT' : 'POST';
+
+  const response = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri čuvanju usluge.',
+      'error'
+    );
+  }
+
+  showAdminMessage(
+    serviceId
+      ? 'Usluga je izmenjena.'
+      : 'Usluga je dodata.'
+  );
+
+  adminServiceForm.reset();
+  document.getElementById('adminServiceId').value = '';
+
+  loadAdminServicesPanel();
+  loadAdminServices();
+});
+
+document.getElementById('clearServiceFormBtn')?.addEventListener('click', () => {
+  adminServiceForm.reset();
+  document.getElementById('adminServiceId').value = '';
+});
+
+function openEditAppointmentForm(app) {
+  if (!editAppointmentBox) return;
+
+  const customerName =
+    app.manual_customer_name ||
+    `${app.first_name || ''} ${app.last_name || ''}`.trim();
+
+  const customerPhone =
+    app.manual_customer_phone ||
+    app.phone ||
+    '';
+
+  document.getElementById('editAppointmentId').value = app.id;
+  document.getElementById('editCustomerName').value = customerName;
+  document.getElementById('editCustomerPhone').value = customerPhone;
+  document.getElementById('editService').value = app.service_id;
+  document.getElementById('editDate').value = app.appointment_date.slice(0, 10);
+  document.getElementById('editTime').value = app.start_time.slice(0, 5);
+  document.getElementById('editNote').value = app.note || '';
+
+  editAppointmentBox.style.display = 'block';
+
+  editAppointmentBox.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+}
+
+editAppointmentForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const appointmentId =
+    document.getElementById('editAppointmentId').value;
+
+  const payload = {
+    customerName: document.getElementById('editCustomerName').value.trim(),
+    customerPhone: document.getElementById('editCustomerPhone').value.trim(),
+    serviceId: document.getElementById('editService').value,
+    date: document.getElementById('editDate').value,
+    time: document.getElementById('editTime').value,
+    note: document.getElementById('editNote').value.trim()
+  };
+
+  const response = await fetch(
+    `${API_URL}/admin/appointments/${appointmentId}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri izmeni termina.',
+      'error'
+    );
+  }
+
+  showAdminMessage('Termin je uspešno izmenjen.');
+
+  editAppointmentForm.reset();
+  editAppointmentBox.style.display = 'none';
+
+  selectedDate = payload.date;
+
+  renderAdminCalendar();
+  loadAdminAppointments();
+});
+
+document.getElementById('cancelEditAppointmentBtn')?.addEventListener('click', () => {
+  editAppointmentForm.reset();
+  editAppointmentBox.style.display = 'none';
+});
+
+async function loadAdminStats(year, month) {
+  try {
+    const response = await fetch(
+      `${API_URL}/admin/stats?year=${year}&month=${month}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return;
+    }
+
+    if (statBookedToday) {
+      statBookedToday.textContent = data.today.bookedToday;
+    }
+
+    if (statCancelledToday) {
+      statCancelledToday.textContent = data.today.cancelledToday;
+    }
+
+    if (statRevenueToday) {
+      statRevenueToday.textContent = `${data.today.revenueToday} RSD`;
+    }
+
+    if (statBlocksToday) {
+      statBlocksToday.textContent = data.today.blocksToday;
+    }
+
+    adminCalendarStats = {};
+
+    data.monthAppointments.forEach(item => {
+      adminCalendarStats[item.date] = {
+        booked: Number(item.booked_count || 0),
+        cancelled: Number(item.cancelled_count || 0),
+        blocks: 0
+      };
+    });
+
+    data.monthBlocks.forEach(item => {
+      if (!adminCalendarStats[item.date]) {
+        adminCalendarStats[item.date] = {
+          booked: 0,
+          cancelled: 0,
+          blocks: 0
+        };
+      }
+
+      adminCalendarStats[item.date].blocks =
+        Number(item.blocks_count || 0);
+    });
+
+    paintCalendarStats();
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function paintCalendarStats() {
+  document.querySelectorAll('.admin-calendar-day[data-date]').forEach(day => {
+    const date = day.dataset.date;
+    const stats = adminCalendarStats[date];
+
+    const oldBadge = day.querySelector('.calendar-day-stats');
+
+    if (oldBadge) {
+      oldBadge.remove();
+    }
+
+    if (!stats) return;
+
+    const badge = document.createElement('div');
+    badge.className = 'calendar-day-stats';
+
+    badge.innerHTML = `
+      ${
+        stats.booked > 0
+          ? `<span>${stats.booked} termina</span>`
+          : ''
+      }
+
+      ${
+        stats.blocks > 0
+          ? `<span>${stats.blocks} blokada</span>`
+          : ''
+      }
+    `;
+
+    day.appendChild(badge);
+  });
+}
+
 checkAdminAccess();
-
-adminDate.value = todayForInput();
-manualDate.value = todayForInput();
-
+renderAdminCalendar();
 loadAdminServices();
 loadAdminAppointments();
+loadAdminServicesPanel();

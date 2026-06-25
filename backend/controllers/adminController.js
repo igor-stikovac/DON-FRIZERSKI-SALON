@@ -41,7 +41,9 @@ exports.getAppointmentsByDate = async (req, res) => {
       `
       SELECT 
         a.id,
-        a.appointment_date,
+        a.user_id,
+        a.service_id,
+        TO_CHAR(a.appointment_date, 'YYYY-MM-DD') AS appointment_date,
         a.start_time,
         a.end_time,
         a.status,
@@ -66,8 +68,19 @@ exports.getAppointmentsByDate = async (req, res) => {
       [date]
     );
 
+    const blocksResult = await pool.query(
+      `
+      SELECT id, block_date, start_time, end_time, reason
+      FROM blocked_slots
+      WHERE block_date = $1
+      ORDER BY start_time
+      `,
+      [date]
+    );
+
     res.json({
-      appointments: result.rows
+      appointments: result.rows,
+      blocks: blocksResult.rows
     });
 
   } catch (error) {
@@ -231,6 +244,432 @@ exports.createManualAppointment = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: 'Greška pri ručnom dodavanju termina.'
+    });
+  }
+};
+
+exports.createBlockedSlot = async (req, res) => {
+  try {
+    const { date, startTime, endTime, reason } = req.body;
+
+    if (!date || !startTime || !endTime) {
+      return res.status(400).json({
+        message: 'Datum, početak i kraj blokade su obavezni.'
+      });
+    }
+
+    const startMinutes = timeToMinutes(startTime);
+    const endMinutes = timeToMinutes(endTime);
+
+    if (startMinutes >= endMinutes) {
+      return res.status(400).json({
+        message: 'Početak blokade mora biti pre kraja.'
+      });
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO blocked_slots
+      (block_date, start_time, end_time, reason)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+      `,
+      [date, startTime, endTime, reason || null]
+    );
+
+    res.status(201).json({
+      message: 'Vreme je blokirano.',
+      block: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri blokiranju vremena.'
+    });
+  }
+};
+
+exports.deleteBlockedSlot = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      DELETE FROM blocked_slots
+      WHERE id = $1
+      RETURNING *
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Blokada nije pronađena.'
+      });
+    }
+
+    res.json({
+      message: 'Blokada je uklonjena.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri uklanjanju blokade.'
+    });
+  }
+};
+
+exports.updateAppointmentByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      serviceId,
+      date,
+      time,
+      customerName,
+      customerPhone,
+      note
+    } = req.body;
+
+    if (!serviceId || !date || !time) {
+      return res.status(400).json({
+        message: 'Usluga, datum i vreme su obavezni.'
+      });
+    }
+
+    const serviceResult = await pool.query(
+      'SELECT duration_minutes FROM services WHERE id = $1',
+      [serviceId]
+    );
+
+    if (serviceResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Usluga nije pronađena.'
+      });
+    }
+
+    const workEnd = getWorkEndByDate(date);
+
+    if (!workEnd) {
+      return res.status(400).json({
+        message: 'Salon ne radi nedeljom.'
+      });
+    }
+
+    const duration = serviceResult.rows[0].duration_minutes;
+
+    const startMinutes = timeToMinutes(time);
+    const endMinutes = startMinutes + duration;
+
+    const startDay = timeToMinutes(WORK_START);
+    const endDay = timeToMinutes(workEnd);
+
+    if (startMinutes < startDay || endMinutes > endDay) {
+      return res.status(400).json({
+        message: 'Termin nije u okviru radnog vremena.'
+      });
+    }
+
+    const bookedResult = await pool.query(
+      `
+      SELECT id, start_time, end_time
+      FROM appointments
+      WHERE appointment_date = $1
+      AND status = 'booked'
+      AND id <> $2
+      `,
+      [date, id]
+    );
+
+    const blocksResult = await pool.query(
+      `
+      SELECT start_time, end_time
+      FROM blocked_slots
+      WHERE block_date = $1
+      `,
+      [date]
+    );
+
+    const unavailable = [
+      ...bookedResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      })),
+      ...blocksResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      }))
+    ];
+
+    const hasOverlap = unavailable.some(slot => {
+      return overlaps(
+        startMinutes,
+        endMinutes,
+        slot.start - BUFFER_MINUTES,
+        slot.end + BUFFER_MINUTES
+      );
+    });
+
+    if (hasOverlap) {
+      return res.status(409).json({
+        message: 'Izabrani termin se preklapa sa drugim terminom ili blokadom.'
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE appointments
+      SET service_id = $1,
+          appointment_date = $2,
+          start_time = $3,
+          end_time = $4,
+          manual_customer_name = $5,
+          manual_customer_phone = $6,
+          note = $7
+      WHERE id = $8
+      RETURNING *
+      `,
+      [
+        serviceId,
+        date,
+        minutesToTime(startMinutes),
+        minutesToTime(endMinutes),
+        customerName || null,
+        customerPhone || null,
+        note || null,
+        id
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Termin nije pronađen.'
+      });
+    }
+
+    res.json({
+      message: 'Termin je uspešno izmenjen.',
+      appointment: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri izmeni termina.'
+    });
+  }
+};
+
+exports.getAdminServices = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT id, name, duration_minutes, price, is_active
+      FROM services
+      ORDER BY id
+      `
+    );
+
+    res.json({
+      services: result.rows
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri učitavanju usluga.'
+    });
+  }
+};
+
+exports.createServiceByAdmin = async (req, res) => {
+  try {
+    const { name, durationMinutes, price } = req.body;
+
+    if (!name || !durationMinutes) {
+      return res.status(400).json({
+        message: 'Naziv i trajanje usluge su obavezni.'
+      });
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO services (name, duration_minutes, price, is_active)
+      VALUES ($1, $2, $3, true)
+      RETURNING *
+      `,
+      [name, durationMinutes, price || 0]
+    );
+
+    res.status(201).json({
+      message: 'Usluga je dodata.',
+      service: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri dodavanju usluge.'
+    });
+  }
+};
+
+exports.updateServiceByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, durationMinutes, price, isActive } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE services
+      SET name = $1,
+          duration_minutes = $2,
+          price = $3,
+          is_active = $4
+      WHERE id = $5
+      RETURNING *
+      `,
+      [name, durationMinutes, price || 0, isActive, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Usluga nije pronađena.'
+      });
+    }
+
+    res.json({
+      message: 'Usluga je izmenjena.',
+      service: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri izmeni usluge.'
+    });
+  }
+};
+
+exports.deleteServiceByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      UPDATE services
+      SET is_active = false
+      WHERE id = $1
+      RETURNING *
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Usluga nije pronađena.'
+      });
+    }
+
+    res.json({
+      message: 'Usluga je deaktivirana.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri deaktiviranju usluge.'
+    });
+  }
+};
+
+exports.getAdminStats = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+      return res.status(400).json({
+        message: 'Godina i mesec su obavezni.'
+      });
+    }
+
+    const monthStart = `${year}-${String(month).padStart(2, '0')}-01`;
+
+    const nextMonthDate = new Date(Number(year), Number(month), 1);
+    const nextMonthStart = nextMonthDate.toISOString().slice(0, 10);
+
+    const todayStatsResult = await pool.query(
+      `
+      SELECT
+        COUNT(*) FILTER (WHERE a.status = 'booked') AS booked_today,
+        COUNT(*) FILTER (WHERE a.status = 'cancelled') AS cancelled_today,
+        COALESCE(SUM(
+          CASE 
+            WHEN a.status = 'booked' THEN COALESCE(s.price, 0)
+            ELSE 0
+          END
+        ), 0) AS revenue_today
+      FROM appointments a
+      LEFT JOIN services s ON s.id = a.service_id
+      WHERE a.appointment_date = CURRENT_DATE
+      `
+    );
+
+    const todayBlocksResult = await pool.query(
+      `
+      SELECT COUNT(*) AS blocks_today
+      FROM blocked_slots
+      WHERE block_date = CURRENT_DATE
+      `
+    );
+
+    const monthAppointmentsResult = await pool.query(
+      `
+      SELECT
+        TO_CHAR(appointment_date, 'YYYY-MM-DD') AS date,
+        COUNT(*) FILTER (WHERE status = 'booked') AS booked_count,
+        COUNT(*) FILTER (WHERE status = 'cancelled') AS cancelled_count
+      FROM appointments
+      WHERE appointment_date >= $1
+      AND appointment_date < $2
+      GROUP BY appointment_date
+      ORDER BY appointment_date
+      `,
+      [monthStart, nextMonthStart]
+    );
+
+    const monthBlocksResult = await pool.query(
+      `
+      SELECT
+        TO_CHAR(block_date, 'YYYY-MM-DD') AS date,
+        COUNT(*) AS blocks_count
+      FROM blocked_slots
+      WHERE block_date >= $1
+      AND block_date < $2
+      GROUP BY block_date
+      ORDER BY block_date
+      `,
+      [monthStart, nextMonthStart]
+    );
+
+    res.json({
+      today: {
+        bookedToday: Number(todayStatsResult.rows[0].booked_today || 0),
+        cancelledToday: Number(todayStatsResult.rows[0].cancelled_today || 0),
+        revenueToday: Number(todayStatsResult.rows[0].revenue_today || 0),
+        blocksToday: Number(todayBlocksResult.rows[0].blocks_today || 0)
+      },
+      monthAppointments: monthAppointmentsResult.rows,
+      monthBlocks: monthBlocksResult.rows
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri učitavanju admin statistike.'
     });
   }
 };

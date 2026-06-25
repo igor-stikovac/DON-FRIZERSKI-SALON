@@ -1,236 +1,261 @@
-const pool = require('../config/db');
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin panel | DON Hair Studio</title>
 
-const WORK_START = '10:00';
-const BUFFER_MINUTES = 5;
+  <link rel="stylesheet" href="css/style.css">
 
-function timeToMinutes(time) {
-  const [hours, minutes] = time.split(':').map(Number);
-  return hours * 60 + minutes;
-}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 
-function minutesToTime(totalMinutes) {
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
-  const minutes = String(totalMinutes % 60).padStart(2, '0');
-  return `${hours}:${minutes}`;
-}
+<body>
 
-function overlaps(startA, endA, startB, endB) {
-  return startA < endB && endA > startB;
-}
+<header class="site-header">
 
-function getWorkEndByDate(date) {
-  const day = new Date(`${date}T00:00:00`).getDay();
+  <a class="logo" href="index.html#home">
+    <img src="images/logo-hed.png" alt="DON Hair Studio">
 
-  if (day === 0) return null;
-  if (day === 6) return '15:00';
+    <div class="logo-text">
+      <span>DON</span>
+      <small>Hair Studio</small>
+    </div>
+  </a>
 
-  return '20:00';
-}
+  <nav class="nav">
+    <a href="index.html#home">Početna</a>
+    <a href="index.html#services">Usluge</a>
+    <a href="profile.html">Moj profil</a>
+  </nav>
 
-exports.getAppointmentsByDate = async (req, res) => {
-  try {
-    const { date } = req.query;
+  <div class="header-actions">
+    <button type="button" class="header-logout-btn" id="adminLogoutBtn">
+      Odjavi se
+    </button>
+  </div>
 
-    if (!date) {
-      return res.status(400).json({
-        message: 'Datum je obavezan.'
-      });
-    }
+</header>
 
-    const result = await pool.query(
-      `
-      SELECT 
-        a.id,
-        a.appointment_date,
-        a.start_time,
-        a.end_time,
-        a.status,
-        a.cancellation_fee,
-        a.manual_customer_name,
-        a.manual_customer_phone,
-        a.note,
+<main class="admin-page-v2">
 
-        u.first_name,
-        u.last_name,
-        u.phone,
-        u.email,
+  <section class="admin-top">
+    <div>
+      <span>DON Admin</span>
+      <h1>PREGLED TERMINA</h1>
+    </div>
+  </section>
 
-        s.name AS service_name,
-        s.price
-      FROM appointments a
-      LEFT JOIN users u ON a.user_id = u.id
-      JOIN services s ON a.service_id = s.id
-      WHERE a.appointment_date = $1
-      ORDER BY a.start_time
-      `,
-      [date]
-    );
+  <section class="admin-stats-grid">
 
-    res.json({
-      appointments: result.rows
-    });
+    <div class="admin-stat-card">
+      <span>Danas zakazano</span>
+      <strong id="statBookedToday">0</strong>
+    </div>
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: 'Greška pri učitavanju termina.'
-    });
-  }
-};
+    <div class="admin-stat-card">
+      <span>Danas otkazano</span>
+      <strong id="statCancelledToday">0</strong>
+    </div>
 
-exports.cancelAppointmentByAdmin = async (req, res) => {
-  try {
-    const { id } = req.params;
+    <div class="admin-stat-card">
+      <span>Prihod danas</span>
+      <strong id="statRevenueToday">0 RSD</strong>
+    </div>
 
-    const result = await pool.query(
-      `
-      UPDATE appointments
-      SET status = 'cancelled',
-          cancellation_fee = 0,
-          cancelled_at = CURRENT_TIMESTAMP
-      WHERE id = $1
-      RETURNING *
-      `,
-      [id]
-    );
+    <div class="admin-stat-card">
+      <span>Blokada danas</span>
+      <strong id="statBlocksToday">0</strong>
+    </div>
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        message: 'Termin nije pronađen.'
-      });
-    }
+  </section>
 
-    res.json({
-      message: 'Termin je otkazan.',
-      appointment: result.rows[0]
-    });
+  <section class="admin-main-grid">
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: 'Greška pri otkazivanju termina.'
-    });
-  }
-};
+    
+    <div class="admin-calendar-panel">
 
-exports.createManualAppointment = async (req, res) => {
-  try {
-    const {
-      serviceId,
-      date,
-      time,
-      customerName,
-      customerPhone,
-      note
-    } = req.body;
+      <div class="admin-calendar-header">
+        <button type="button" id="prevMonthBtn">‹</button>
 
-    if (!serviceId || !date || !time || !customerName) {
-      return res.status(400).json({
-        message: 'Usluga, datum, vreme i ime mušterije su obavezni.'
-      });
-    }
+        <h2 id="adminMonthTitle">Mesec</h2>
 
-    const serviceResult = await pool.query(
-      'SELECT duration_minutes FROM services WHERE id = $1',
-      [serviceId]
-    );
+        <button type="button" id="nextMonthBtn">›</button>
+      </div>
 
-    if (serviceResult.rows.length === 0) {
-      return res.status(404).json({
-        message: 'Usluga nije pronađena.'
-      });
-    }
+      <div class="admin-calendar-weekdays">
+        <span>Pon</span>
+        <span>Uto</span>
+        <span>Sre</span>
+        <span>Čet</span>
+        <span>Pet</span>
+        <span>Sub</span>
+        <span>Ned</span>
+      </div>
 
-    const workEnd = getWorkEndByDate(date);
+      <div class="admin-month-grid" id="adminMonthGrid"></div>
 
-    if (!workEnd) {
-      return res.status(400).json({
-        message: 'Salon ne radi nedeljom.'
-      });
-    }
+    </div>
 
-    const duration = serviceResult.rows[0].duration_minutes;
+    <div class="admin-day-panel">
 
-    const startMinutes = timeToMinutes(time);
-    const endMinutes = startMinutes + duration;
+      <div class="admin-day-header">
+        <div>
+          <span>Izabrani dan</span>
+          <h2 id="selectedDayTitle">-</h2>
+        </div>
+      </div>
 
-    const startDay = timeToMinutes(WORK_START);
-    const endDay = timeToMinutes(workEnd);
+      <div class="admin-tabs">
+        <button type="button" class="admin-tab active" data-admin-tab="appointments">
+          Termini
+        </button>
+        <button type="button" class="admin-tab" data-admin-tab="manual">
+          Dodaj termin
+        </button>
+        <button type="button" class="admin-tab" data-admin-tab="block">
+          Blokiraj vreme
+        </button>
+        <button type="button" class="admin-tab" data-admin-tab="services">
+          Usluge
+        </button>
+      </div>
 
-    if (startMinutes < startDay || endMinutes > endDay) {
-      return res.status(400).json({
-        message: 'Termin nije u okviru radnog vremena.'
-      });
-    }
+      <div class="admin-tab-content active" id="appointmentsTab">
+        <div id="adminAppointmentsList"></div>
+      </div>
 
-    const bookedResult = await pool.query(
-      `
-      SELECT start_time, end_time
-      FROM appointments
-      WHERE appointment_date = $1
-      AND status = 'booked'
-      `,
-      [date]
-    );
+      <div id="editAppointmentBox" class="admin-edit-box" style="display:none;">
 
-    const hasOverlap = bookedResult.rows.some(row => {
-      const bookedStart = timeToMinutes(row.start_time.slice(0, 5));
-      const bookedEnd = timeToMinutes(row.end_time.slice(0, 5));
+        <h3>Izmeni termin</h3>
 
-      return overlaps(
-        startMinutes,
-        endMinutes,
-        bookedStart - BUFFER_MINUTES,
-        bookedEnd + BUFFER_MINUTES
-      );
-    });
+        <form id="editAppointmentForm" class="admin-form">
 
-    if (hasOverlap) {
-      return res.status(409).json({
-        message: 'Taj termin je već zauzet.'
-      });
-    }
+          <input type="hidden" id="editAppointmentId">
 
-    const result = await pool.query(
-      `
-      INSERT INTO appointments
-      (
-        user_id,
-        service_id,
-        appointment_date,
-        start_time,
-        end_time,
-        manual_customer_name,
-        manual_customer_phone,
-        note,
-        status
-      )
-      VALUES
-      (
-        NULL, $1, $2, $3, $4, $5, $6, $7, 'booked'
-      )
-      RETURNING *
-      `,
-      [
-        serviceId,
-        date,
-        minutesToTime(startMinutes),
-        minutesToTime(endMinutes),
-        customerName,
-        customerPhone || null,
-        note || null
-      ]
-    );
+          <label>Ime mušterije</label>
+          <input type="text" id="editCustomerName">
 
-    res.status(201).json({
-      message: 'Termin je ručno dodat.',
-      appointment: result.rows[0]
-    });
+          <label>Telefon</label>
+          <input type="text" id="editCustomerPhone">
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: 'Greška pri ručnom dodavanju termina.'
-    });
-  }
-};
+          <label>Usluga</label>
+          <select id="editService" required>
+            <option value="">Izaberi uslugu</option>
+          </select>
+
+          <label>Datum</label>
+          <input type="date" id="editDate" required>
+
+          <label>Vreme</label>
+          <input type="time" id="editTime" required>
+
+          <label>Napomena</label>
+          <textarea id="editNote" rows="3"></textarea>
+
+          <button type="submit" class="btn btn-gold admin-submit-btn">
+            Sačuvaj izmene
+          </button>
+
+          <button type="button" class="btn btn-dark admin-submit-btn" id="cancelEditAppointmentBtn">
+            Odustani
+          </button>
+
+        </form>
+
+      </div>
+
+      <div class="admin-tab-content" id="manualTab">
+
+        <form id="manualAppointmentForm" class="admin-form">
+
+          <label>Ime mušterije</label>
+          <input type="text" id="manualCustomerName" required>
+
+          <label>Telefon</label>
+          <input type="text" id="manualCustomerPhone">
+
+          <label>Usluga</label>
+          <select id="manualService" required>
+            <option value="">Izaberi uslugu</option>
+          </select>
+
+          <label>Vreme</label>
+          <input type="time" id="manualTime" required>
+
+          <label>Napomena</label>
+          <textarea id="manualNote" rows="3"></textarea>
+
+          <button type="submit" class="btn btn-gold admin-submit-btn">
+            Dodaj termin
+          </button>
+
+        </form>
+
+      </div>
+
+      <div class="admin-tab-content" id="blockTab">
+
+        <form id="blockTimeForm" class="admin-form">
+
+          <label>Od</label>
+          <input type="time" id="blockStartTime" required>
+
+          <label>Do</label>
+          <input type="time" id="blockEndTime" required>
+
+          <label>Razlog</label>
+          <textarea id="blockReason" rows="3" placeholder="Pauza, privatna obaveza, neradan deo dana..."></textarea>
+
+          <button type="submit" class="btn btn-dark admin-submit-btn">
+            Blokiraj vreme
+          </button>
+
+        </form>
+
+      </div>
+        
+      <div class="admin-tab-content" id="servicesTab">
+
+        <form id="adminServiceForm" class="admin-form">
+
+          <input type="hidden" id="adminServiceId">
+
+          <label>Naziv usluge</label>
+          <input type="text" id="adminServiceName" required>
+
+          <label>Trajanje u minutima</label>
+          <input type="number" id="adminServiceDuration" required>
+
+          <label>Cena</label>
+          <input type="number" id="adminServicePrice" required>
+
+          <button type="submit" class="btn btn-gold admin-submit-btn">
+            Sačuvaj uslugu
+          </button>
+
+          <button type="button" class="btn btn-dark admin-submit-btn" id="clearServiceFormBtn">
+            Očisti formu
+          </button>
+
+        </form>
+
+        <div id="adminServicesList" class="admin-services-list"></div>
+
+      </div>
+      
+
+      <p id="adminMessage" class="auth-message"></p>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script src="js/admin.js"></script>
+
+</body>
+</html>

@@ -9,341 +9,204 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-<!-- <header class="site-header">
-  <a class="logo" href="index.html">
-    <span>DON</span>
-    <small>Hair Studio</small>
-  </a>
-
-  <nav class="nav">
-    <a href="index.html#home">Početna</a>
-    <a href="index.html#services">Usluge</a>
-    <a href="index.html#booking">Zakazivanje</a>
-    <a href="index.html#contact">Kontakt</a>
-  </nav>
-
-  <div class="header-actions">
-    <button class="btn btn-outline" id="logoutProfileBtn">Odjavi se</button>
-  </div>
-</header> -->
-
-<header class="site-header">
-
-  <a class="logo" href="index.html#home">
-    <img src="slike/logo.jpg" alt="DON Hair Studio">
-
-    <div class="logo-text">
+  <!-- <header class="site-header">
+    <a class="logo" href="index.html">
       <span>DON</span>
       <small>Hair Studio</small>
+    </a>
+
+    <nav class="nav">
+      <a href="index.html#home">Početna</a>
+      <a href="index.html#services">Usluge</a>
+      <a href="index.html#booking">Zakazivanje</a>
+      <a href="index.html#contact">Kontakt</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn btn-outline" id="logoutProfileBtn">Odjavi se</button>
     </div>
-  </a>
+  </header> -->
 
-  <button class="menu-btn" id="menuBtn">☰</button>
+  <header class="site-header">
 
-  <nav class="nav" id="navMenu">
-    <a href="index.html#home">Početna</a>
-    <a href="index.html#services">Usluge</a>
-    <a href="index.html#booking">Zakazivanje</a>
-    <a href="index.html#about">O nama</a>
-    <a href="index.html#contact">Kontakt</a>
-  </nav>
+    <a class="logo" href="index.html#home">
+      <img src="images/logo-hed.png" alt="DON Hair Studio">
 
-  <div class="header-actions">
-
-    <a href="#profileAuthBlock" class="header-login-btn" id="loginNavBtn">
-      Prijavi se
+      <div class="logo-text">
+        <span>DON</span>
+        <small>Hair Studio</small>
+      </div>
     </a>
 
-    <a href="profile.html" class="profile-icon-btn" id="profileNavBtn" style="display:none">
-      👤
-    </a>
+    <button class="menu-btn" id="menuBtn">☰</button>
 
-    <button type="button" class="header-logout-btn" id="logoutProfileBtn" style="display:none">
-      Odjavi se
-    </button>
+    <nav class="nav" id="navMenu">
+      <a href="index.html#home">Početna</a>
+      <a href="index.html#services">Usluge</a>
+      <a href="index.html#booking">Zakazivanje</a>
+      <a href="index.html#about">O nama</a>
+      <a href="index.html#contact">Kontakt</a>
+    </nav>
 
-    <a href="index.html#booking" class="header-booking-btn">
-      Zakaži termin
-    </a>
+    <div class="header-actions">
 
-  </div>
+      <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
+        ⚙️
+      </a>
+      <a href="#profileAuthBlock" class="header-login-btn" id="loginNavBtn">
+        Prijavi se
+      </a>
 
-</header>
+      <a href="profile.html" class="profile-icon-btn" id="profileNavBtn" style="display:none">
+        👤
+      </a>
 
-<main class="profile-page">
+      <button type="button" class="header-logout-btn" id="logoutProfileBtn" style="display:none">
+        Odjavi se
+      </button>
 
-  <section id="profileAuthBlock" class="profile-auth-card">
+      <a href="index.html#booking" class="header-booking-btn">
+        Zakaži termin
+      </a>
 
-    <div class="profile-auth-header">
-      <span class="section-tag">DON Hair Studio</span>
-      <h1>Prijava na profil</h1>
-      <p>Prijavite se ili napravite nalog da biste videli svoje podatke i termine.</p>
     </div>
 
-    <div class="profile-auth-grid">
+  </header>
 
-      <div class="profile-form-card">
-        <h2>Prijava</h2>
+  <main class="profile-page">
 
-        <form id="profileLoginForm">
-          <label>Email</label>
-          <input type="email" id="profileLoginEmail" required>
+    <section id="profileAuthBlock" class="profile-auth-card">
 
-          <label>Lozinka</label>
-          <input type="password" id="profileLoginPassword" required>
-
-          <button type="submit" class="btn btn-gold profile-btn">
-            Prijavi se
-          </button>
-        </form>
-
-        <p id="profileLoginMessage" class="auth-message"></p>
+      <div class="profile-auth-header">
+        <span class="section-tag">DON Hair Studio</span>
+        <h1>Prijava na profil</h1>
+        <p>Prijavite se ili napravite nalog da biste videli svoje podatke i termine.</p>
       </div>
 
-      <div class="profile-form-card">
-        <h2>Registracija</h2>
+      <div class="profile-auth-grid">
 
-        <form id="profileRegisterForm">
-          <label>Ime</label>
-          <input id="profileFirstName" required>
+        <div class="profile-form-card">
+          <h2>Prijava</h2>
 
-          <label>Prezime</label>
-          <input id="profileLastName" required>
+          <form id="profileLoginForm">
+            <label>Email</label>
+            <input type="text" id="profileLoginEmail" placeholder="Email ili admin korisničko ime" required>
 
-          <label>Telefon</label>
-          <input id="profilePhone" required>
+            <label>Lozinka</label>
+            <input type="password" id="profileLoginPassword" required>
 
-          <label>Email</label>
-          <input type="email" id="profileEmail" required>
+            <button type="submit" class="btn btn-gold profile-btn">
+              Prijavi se
+            </button>
+          </form>
 
-          <label>Lozinka</label>
-          <input type="password" id="profilePassword" required>
+          <p id="profileLoginMessage" class="auth-message"></p>
+        </div>
 
-          <button type="submit" class="btn btn-dark profile-btn">
-            Napravi nalog
-          </button>
-        </form>
+        <div class="profile-form-card">
+          <h2>Registracija</h2>
 
-        <p id="profileRegisterMessage" class="auth-message"></p>
+          <form id="profileRegisterForm">
+            <label>Ime</label>
+            <input id="profileFirstName" required>
+
+            <label>Prezime</label>
+            <input id="profileLastName" required>
+
+            <label>Telefon</label>
+            <input id="profilePhone" required>
+
+            <label>Email</label>
+            <input type="email" id="profileEmail" required>
+
+            <label>Lozinka</label>
+            <input type="password" id="profilePassword" required>
+
+            <button type="submit" class="btn btn-dark profile-btn">
+              Napravi nalog
+            </button>
+          </form>
+
+          <p id="profileRegisterMessage" class="auth-message"></p>
+        </div>
+
       </div>
+
+    </section>
+
+    <div id="profileContentBlock" class="profile-content-block" style="display:none;">
+
+      <section class="profile-hero-card">
+        <span class="section-tag">Moj profil</span>
+        <h1 id="profileWelcomeTitle">Dobro došli</h1>
+        <p id="profileWelcomeText">
+          Ovde možete videti svoje podatke i zakazane termine.
+        </p>
+      </section>
+
+      <section class="profile-card clean-profile-card">
+        <div class="profile-card-top">
+          <div>
+            <h2>Lični podaci</h2>
+            <p>Podaci vašeg korisničkog naloga</p>
+          </div>
+
+          <button id="editProfileBtn" class="btn btn-gold">
+            Izmeni podatke
+          </button>
+        </div>
+
+        <div id="profileInfo"></div>
+
+        <div id="editProfileSection" class="profile-edit-section" style="display:none;">
+          <input type="text" id="editFirstName" placeholder="Ime">
+          <input type="text" id="editLastName" placeholder="Prezime">
+          <input type="email" id="editEmail" placeholder="Email">
+          <input type="text" id="editPhone" placeholder="Telefon">
+
+          <button id="saveProfileBtn" class="btn btn-dark profile-btn">
+            Sačuvaj izmene
+          </button>
+        </div>
+      </section>
+
+      <section class="profile-card clean-profile-card">
+        <div class="profile-card-top">
+          <div>
+            <h2>Moji termini</h2>
+            <p>Pregled zakazanih i otkazanih termina</p>
+          </div>
+        </div>
+
+        <div id="myAppointmentsList"></div>
+      </section>
 
     </div>
 
-  </section>
+  </main>
 
-  <div id="profileContentBlock" class="profile-content-block" style="display:none;">
+  <div id="cancelModal" class="cancel-modal">
+    <div class="cancel-modal-box">
+      <h3>Otkazivanje termina</h3>
 
-    <section class="profile-hero-card">
-      <span class="section-tag">Moj profil</span>
-      <h1 id="profileWelcomeTitle">Dobro došli</h1>
-      <p id="profileWelcomeText">
-        Ovde možete videti svoje podatke i zakazane termine.
+      <p id="cancelModalText">
+        Da li ste sigurni da želite da otkažete termin?
       </p>
-    </section>
 
-    <section class="profile-card clean-profile-card">
-      <div class="profile-card-top">
-        <div>
-          <h2>Lični podaci</h2>
-          <p>Podaci vašeg korisničkog naloga</p>
-        </div>
+      <div class="cancel-modal-actions">
+        <button type="button" class="btn btn-dark" id="cancelModalNo">
+          Ne, odustani
+        </button>
 
-        <button id="editProfileBtn" class="btn btn-gold">
-          Izmeni podatke
+        <button type="button" class="btn btn-gold" id="cancelModalYes">
+          Da, otkaži termin
         </button>
       </div>
-
-      <div id="profileInfo"></div>
-
-      <div id="editProfileSection" class="profile-edit-section" style="display:none;">
-        <input type="text" id="editFirstName" placeholder="Ime">
-        <input type="text" id="editLastName" placeholder="Prezime">
-        <input type="email" id="editEmail" placeholder="Email">
-        <input type="text" id="editPhone" placeholder="Telefon">
-
-        <button id="saveProfileBtn" class="btn btn-dark profile-btn">
-          Sačuvaj izmene
-        </button>
-      </div>
-    </section>
-
-    <section class="profile-card clean-profile-card">
-      <div class="profile-card-top">
-        <div>
-          <h2>Moji termini</h2>
-          <p>Pregled zakazanih i otkazanih termina</p>
-        </div>
-      </div>
-
-      <div id="myAppointmentsList"></div>
-    </section>
-
-  </div>
-
-</main>
-
-<!-- <main class="profile-page">
-
-  <section id="profileAuthBlock" class="profile-card">
-    <h1>Prijava</h1>
-    <p>Prijavite se da biste videli svoje podatke i termine.</p>
-
-    <form id="profileLoginForm">
-      <label>Email</label>
-      <input type="email" id="profileLoginEmail" required>
-
-      <label>Lozinka</label>
-      <input type="password" id="profileLoginPassword" required>
-
-      <button type="submit" class="btn btn-gold full">
-        Prijavi se
-      </button>
-    </form>
-
-    <p id="profileLoginMessage" class="auth-message"></p>
-
-    <hr style="margin: 30px 0;">
-
-    <h2>Registracija</h2>
-
-    <form id="profileRegisterForm">
-      <label>Ime</label>
-      <input id="profileFirstName" required>
-
-      <label>Prezime</label>
-      <input id="profileLastName" required>
-
-      <label>Telefon</label>
-      <input id="profilePhone" required>
-
-      <label>Email</label>
-      <input type="email" id="profileEmail" required>
-
-      <label>Lozinka</label>
-      <input type="password" id="profilePassword" required>
-
-      <button type="submit" class="btn btn-dark full">
-        Napravi nalog
-      </button>
-    </form>
-
-    <p id="profileRegisterMessage" class="auth-message"></p>
-  </section>
-
-  <div id="profileContentBlock" style="display:none;">
-
-    <section class="profile-card">
-      <h1 id="profileWelcomeTitle">Moj profil</h1>
-      <p id="profileWelcomeText"></p>
-
-      <div id="profileInfo"></div>
-
-      <button id="editProfileBtn" class="btn btn-gold" style="margin-top:20px;">
-        Izmeni podatke
-      </button>
-
-      <div id="editProfileSection" style="display:none; margin-top:20px;">
-        <input type="text" id="editFirstName" placeholder="Ime">
-        <input type="text" id="editLastName" placeholder="Prezime">
-        <input type="email" id="editEmail" placeholder="Email">
-        <input type="text" id="editPhone" placeholder="Telefon">
-
-        <button id="saveProfileBtn" class="btn btn-dark">
-          Sačuvaj
-        </button>
-      </div>
-    </section>
-
-    <section class="profile-card">
-      <h2>Moji termini</h2>
-      <div id="myAppointmentsList"></div>
-    </section>
-
-  </div>
-
-</main> -->
-<!-- <main class="profile-page">
-  <section id="profileAuthBlock" class="profile-card">
-    <h2>Prijava</h2>
-
-    <form id="profileLoginForm">
-      <label>Email</label>
-      <input type="email" id="profileLoginEmail" required>
-
-      <label>Lozinka</label>
-      <input type="password" id="profileLoginPassword" required>
-
-      <button type="submit" class="btn btn-gold full">
-        Prijavi se
-      </button>
-    </form>
-
-    <p id="profileLoginMessage" class="auth-message"></p>
-
-    <hr style="margin: 30px 0;">
-
-    <h2>Registracija</h2>
-
-    <form id="profileRegisterForm">
-      <label>Ime</label>
-      <input id="profileFirstName" required>
-
-      <label>Prezime</label>
-      <input id="profileLastName" required>
-
-      <label>Telefon</label>
-      <input id="profilePhone" required>
-
-      <label>Email</label>
-      <input type="email" id="profileEmail" required>
-
-      <label>Lozinka</label>
-      <input type="password" id="profilePassword" required>
-
-      <button type="submit" class="btn btn-dark full">
-        Napravi nalog
-      </button>
-    </form>
-
-    <p id="profileRegisterMessage" class="auth-message"></p>
-  </section>
-
-  <section class="profile-card">
-    <div class="profile-hero">
-      <h1>Moj profil</h1>
-      <p>Pregled podataka i zakazanih termina</p>
     </div>
-    <div id="profileInfo">
-      <button id="editProfileBtn" class="btn btn-gold">
-        Izmeni podatke
-      </button>
-
-      <div id="editProfileSection" style="display:none; margin-top:20px;">
-
-        <input type="text" id="editFirstName" placeholder="Ime">
-
-        <input type="text" id="editLastName" placeholder="Prezime">
-
-        <input type="email" id="editEmail" placeholder="Email">
-
-        <input type="text" id="editPhone" placeholder="Telefon">
-
-        <button id="saveProfileBtn" class="btn btn-dark">
-          Sačuvaj
-        </button>
-
-    </div>
-    
-  </section>
-
-  <section class="profile-card">
-    <h2>Moji termini</h2>
-    <div id="myAppointmentsList"></div>
-  </section>
-</main> -->
-
-<script src="js/script.js"></script>
+  </div>
+  <script src="js/script.js"></script>
 </body>
 </html>

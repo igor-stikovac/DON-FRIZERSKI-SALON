@@ -137,7 +137,7 @@ const loginForm = document.getElementById('loginForm');
 
 loginForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
-  alert('Kliknuto je prijavi se');
+  
   const payload = {
     email: document.getElementById('loginEmail').value.trim(),
     password: document.getElementById('loginPassword').value
@@ -176,14 +176,14 @@ loginForm?.addEventListener('submit', async (event) => {
     const firstName =
       data.user.first_name || data.user.firstName || '';
 
-    showGlobalMessage(
-      `Dobro došli, ${firstName}! Uspešno ste se prijavili.`
-    );
+    // showGlobalMessage(
+    //   `Dobro došli, ${firstName}! Uspešno ste se prijavili.`
+    // );
 
-    setMessage(
-      loginMessage,
-      `Dobro došli, ${firstName}! Uspešno ste se prijavili.`
-    );
+    // setMessage(
+    //   loginMessage,
+    //   `Dobro došli, ${firstName}! Uspešno ste se prijavili.`
+    // );
 
     renderUserStatus();
     renderWelcomeBanner();
@@ -472,23 +472,81 @@ async function loadMyAppointments() {
 
     const data = await response.json();
 
-    list.innerHTML = '';
+    const appointments = data.appointments || [];
 
-    if (!data.appointments || data.appointments.length === 0) {
+    if (appointments.length === 0) {
       list.innerHTML = '<p>Nemate zakazane termine.</p>';
       return;
     }
 
-    data.appointments.forEach(app => {
-      const card = document.createElement('div');
-      card.className = 'appointment-card';
+    const now = new Date();
 
-      const statusText =
-        app.status === 'booked'
-          ? 'Zakazan'
-          : 'Otkazan';
+    const future = [];
+    const past = [];
+    const cancelled = [];
 
-      card.innerHTML = `
+    appointments.forEach(app => {
+      const datePart = app.appointment_date.slice(0, 10);
+      const timePart = app.start_time.slice(0, 5);
+
+      const appointmentDateTime =
+        new Date(`${datePart}T${timePart}`);
+
+      if (app.status === 'cancelled') {
+        cancelled.push(app);
+      } else if (appointmentDateTime >= now) {
+        future.push(app);
+      } else {
+        past.push(app);
+      }
+    });
+
+    list.innerHTML = `
+      ${renderAppointmentGroup('Budući termini', future, true)}
+      ${renderAppointmentGroup('Prošli termini', past, false)}
+      ${renderAppointmentGroup('Otkazani termini', cancelled, false)}
+    `;
+
+  } catch (error) {
+    list.innerHTML = '<p>Greška pri učitavanju termina.</p>';
+  }
+}
+
+function renderAppointmentGroup(title, appointments, allowCancel) {
+  if (!appointments || appointments.length === 0) {
+    return `
+      <div class="profile-appointments-group">
+        <h3>${title}</h3>
+        <p class="empty-appointments">Nema termina.</p>
+      </div>
+    `;
+  }
+
+  const cards = appointments.map(app => {
+    const statusText =
+      app.status === 'booked'
+        ? 'Zakazan'
+        : 'Otkazan';
+
+    const cancelButton =
+      allowCancel && app.status === 'booked'
+        ? `<button 
+            class="btn btn-dark" 
+            onclick="cancelAppointment(${app.id}, '${app.appointment_date.slice(0, 10)}', ${app.price || 0})"
+          >
+            Otkaži termin
+          </button>`
+        : '';
+
+    const cancellationFee =
+      app.status === 'cancelled'
+        ? `<div class="cancel-fee">
+             Naknada: ${app.cancellation_fee || 0} RSD
+           </div>`
+        : '';
+
+    return `
+      <div class="appointment-card">
         <h3>${app.service_name}</h3>
 
         <p>
@@ -501,43 +559,91 @@ async function loadMyAppointments() {
           ${statusText}
         </p>
 
-        ${
-          app.status === 'booked'
-            ? `<button class="btn btn-dark" onclick="cancelAppointment(${app.id})">Otkaži termin</button>`
-            : `<div class="cancel-fee">Naknada: ${app.cancellation_fee || 0} RSD</div>`
-        }
-      `;
+        ${cancelButton}
+        ${cancellationFee}
+      </div>
+    `;
+  }).join('');
 
-      list.appendChild(card);
-    });
+  return `
+    <div class="profile-appointments-group">
+      <h3>${title}</h3>
+      ${cards}
+    </div>
+  `;
+}
 
-  } catch (error) {
-    list.innerHTML = '<p>Greška pri učitavanju termina.</p>';
+// async function cancelAppointment(id) {
+//   const token = localStorage.getItem('don_token');
+
+//   const confirmed = confirm(
+//     'Da li ste sigurni da želite da otkažete termin? Ako otkazujete na dan termina naplaćuje se 100%, a dan pre 80% cene.'
+//   );
+
+//   if (!confirmed) return;
+
+//   const response = await fetch(`${API_URL}/appointments/${id}/cancel`, {
+//     method: 'PATCH',
+//     headers: {
+//       Authorization: `Bearer ${token}`
+//     }
+//   });
+
+//   const data = await response.json();
+
+//   alert(data.message);
+
+//   loadMyAppointments();
+//   loadAvailableSlots();
+// }
+
+let appointmentToCancel = null;
+
+function cancelAppointment(id, appointmentDate, price) {
+  appointmentToCancel = id;
+
+  const modal = document.getElementById('cancelModal');
+  const text = document.getElementById('cancelModalText');
+
+  const today = new Date();
+  const tomorrow = new Date();
+
+  tomorrow.setDate(today.getDate() + 1);
+
+  const todayString = formatDateLocal(today);
+  const tomorrowString = formatDateLocal(tomorrow);
+
+  let percent = 0;
+
+  if (appointmentDate === todayString) {
+    percent = 100;
+  } else if (appointmentDate === tomorrowString) {
+    percent = 80;
+  }
+
+  const fee = Math.round((Number(price) || 0) * percent / 100);
+
+  if (text) {
+    if (percent > 0) {
+      text.textContent =
+        `Ako sada otkažete termin, naknada je ${percent}% cene, odnosno ${fee} RSD. Da li ste sigurni?`;
+    } else {
+      text.textContent =
+        'Otkazivanje ovog termina je bez naknade. Da li ste sigurni?';
+    }
+  }
+
+  if (modal) {
+    modal.classList.add('active');
   }
 }
 
-async function cancelAppointment(id) {
-  const token = localStorage.getItem('don_token');
+function formatDateLocal(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
-  const confirmed = confirm(
-    'Da li ste sigurni da želite da otkažete termin? Ako otkazujete na dan termina naplaćuje se 100%, a dan pre 80% cene.'
-  );
-
-  if (!confirmed) return;
-
-  const response = await fetch(`${API_URL}/appointments/${id}/cancel`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  const data = await response.json();
-
-  alert(data.message);
-
-  loadMyAppointments();
-  loadAvailableSlots();
+  return `${year}-${month}-${day}`;
 }
 
 async function getCurrentUserFromDatabase() {
@@ -666,10 +772,10 @@ document.getElementById('logoutProfileBtn')?.addEventListener('click', () => {
   localStorage.removeItem('don_token');
   localStorage.removeItem('don_user');
 
-  sessionStorage.setItem(
-    'logoutMessage',
-    'Uspešno ste se odjavili.'
-  );
+  // sessionStorage.setItem(
+  //   'logoutMessage',
+  //   'Uspešno ste se odjavili.'
+  // );
 
   window.location.href = 'index.html';
 });
@@ -854,3 +960,171 @@ toggleServicesBtn?.addEventListener('click', () => {
       ? 'Prikaži sve usluge'
       : 'Prikaži manje';
 });
+
+document.getElementById('saveProfileBtn')?.addEventListener('click', async (event) => {
+  event.preventDefault();
+
+  const token = localStorage.getItem('don_token');
+
+  if (!token) {
+    showGlobalMessage('Morate biti prijavljeni.', 'error');
+    return;
+  }
+
+  const payload = {
+    firstName: document.getElementById('editFirstName').value.trim(),
+    lastName: document.getElementById('editLastName').value.trim(),
+    email: document.getElementById('editEmail').value.trim(),
+    phone: document.getElementById('editPhone').value.trim()
+  };
+
+  try {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showGlobalMessage(
+        data.message || 'Greška pri izmeni podataka.',
+        'error'
+      );
+      return;
+    }
+
+    localStorage.setItem('don_user', JSON.stringify(data.user));
+
+    showGlobalMessage('Podaci su uspešno izmenjeni.');
+
+    const editSection = document.getElementById('editProfileSection');
+
+    if (editSection) {
+      editSection.style.display = 'none';
+    }
+
+    renderUserStatus();
+    renderProfilePage();
+
+  } catch (error) {
+    showGlobalMessage(
+      'Backend nije pokrenut ili API nije dostupan.',
+      'error'
+    );
+  }
+});
+
+document.getElementById('cancelModalNo')?.addEventListener('click', () => {
+  appointmentToCancel = null;
+
+  document.getElementById('cancelModal')?.classList.remove('active');
+});
+
+document.getElementById('cancelModalYes')?.addEventListener('click', async () => {
+  if (!appointmentToCancel) return;
+
+  const token = localStorage.getItem('don_token');
+
+  try {
+    const response = await fetch(`${API_URL}/appointments/${appointmentToCancel}/cancel`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      showGlobalMessage(
+        data.message || 'Greška pri otkazivanju termina.',
+        'error'
+      );
+      return;
+    }
+
+    showGlobalMessage(data.message || 'Termin je otkazan.');
+
+    appointmentToCancel = null;
+
+    document.getElementById('cancelModal')?.classList.remove('active');
+
+    loadMyAppointments();
+
+  } catch (error) {
+    showGlobalMessage(
+      'Backend nije pokrenut ili API nije dostupan.',
+      'error'
+    );
+  }
+});
+
+function getServiceImage(serviceName) {
+  const name = serviceName.toLowerCase();
+
+  if (name.includes('fade')) {
+    return 'images/fade.jpg';
+  }
+
+  if (name.includes('brada')) {
+    return 'images/brada.jpg';
+  }
+
+  if (name.includes('pranje')) {
+    return 'images/pranje.jpg';
+  }
+
+  if (name.includes('farbanje') || name.includes('bojenje')) {
+    return 'images/farbanje.jpg';
+  }
+
+  return 'images/sisanje.jpg';
+}
+
+async function loadHomepageServicesCards() {
+  const servicesGrid = document.getElementById('servicesGrid');
+
+  if (!servicesGrid) return;
+
+  servicesGrid.innerHTML = '';
+
+  try {
+    const response = await fetch(`${API_URL}/services`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      servicesGrid.innerHTML = '<p>Greška pri učitavanju usluga.</p>';
+      return;
+    }
+
+    data.services.forEach(service => {
+      const card = document.createElement('article');
+      card.className = 'service-card';
+
+      card.innerHTML = `
+        <div class="service-image">
+          <img src="${getServiceImage(service.name)}" alt="${service.name}">
+        </div>
+
+        <div class="service-content">
+          <h3>${service.name}</h3>
+          <p>Trajanje: ${service.duration_minutes} minuta</p>
+          <span>${service.price || 0} RSD</span>
+        </div>
+      `;
+
+      servicesGrid.appendChild(card);
+    });
+
+  } catch (error) {
+    servicesGrid.innerHTML = '<p>Backend nije dostupan.</p>';
+  }
+}
+
+renderUserStatus();
+loadHomepageServicesCards();

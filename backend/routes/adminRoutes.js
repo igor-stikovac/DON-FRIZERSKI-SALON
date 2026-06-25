@@ -7,7 +7,15 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 const {
   getAppointmentsByDate,
   cancelAppointmentByAdmin,
-  createManualAppointment
+  createManualAppointment,
+  updateAppointmentByAdmin,
+  createBlockedSlot,
+  deleteBlockedSlot,
+  getAdminServices,
+  createServiceByAdmin,
+  updateServiceByAdmin,
+  deleteServiceByAdmin,
+  getAdminStats
 } = require('../controllers/adminController');
 
 router.get(
@@ -29,6 +37,62 @@ router.patch(
   authMiddleware,
   adminMiddleware,
   cancelAppointmentByAdmin
+);
+
+router.post(
+  '/blocks',
+  authMiddleware,
+  adminMiddleware,
+  createBlockedSlot
+);
+
+router.delete(
+  '/blocks/:id',
+  authMiddleware,
+  adminMiddleware,
+  deleteBlockedSlot
+);
+
+router.put(
+  '/appointments/:id',
+  authMiddleware,
+  adminMiddleware,
+  updateAppointmentByAdmin
+);
+
+router.get(
+  '/services',
+  authMiddleware,
+  adminMiddleware,
+  getAdminServices
+);
+
+router.post(
+  '/services',
+  authMiddleware,
+  adminMiddleware,
+  createServiceByAdmin
+);
+
+router.put(
+  '/services/:id',
+  authMiddleware,
+  adminMiddleware,
+  updateServiceByAdmin
+);
+
+router.delete(
+  '/services/:id',
+  authMiddleware,
+  adminMiddleware,
+  deleteServiceByAdmin
+);
+
+router.get(
+  '/stats',
+  authMiddleware,
+  adminMiddleware,
+  getAdminStats
 );
 
 module.exports = router;

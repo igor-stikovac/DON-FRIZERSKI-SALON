@@ -31,7 +31,7 @@
     <div class="header-actions">
 
       <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
-        aaa ddd ⚙️
+        ⚙️
       </a>
       <a href="profile.html" class="profile-link">
         <i class="fas fa-user"></i>
@@ -157,111 +157,19 @@
         <h2>Usluge koje pružamo</h2>
       </div>
 
-      <div class="services-grid collapsed" id="servicesGrid">
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/sisanje.jpg" alt="Šišanje">
-          </div>
-
-          <div class="service-content">
-            <h3>Šišanje</h3>
-            <p>Klasično muško šišanje i stilizovanje.</p>
-            <span>30 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/fade.jpg" alt="Fade">
-          </div>
-
-          <div class="service-content">
-            <h3>Fade</h3>
-            <p>Moderan fade prelaz sa preciznom završnom obradom.</p>
-            <span>40 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/brada.jpg" alt="Brada">
-          </div>
-
-          <div class="service-content">
-            <h3>Brada</h3>
-            <p>Oblikovanje, skraćivanje i sređivanje brade.</p>
-            <span>20 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/fade-brada.jpg" alt="Fade + brada">
-          </div>
-
-          <div class="service-content">
-            <h3>Fade + brada</h3>
-            <p>Kompletno sređivanje kose i brade.</p>
-            <span>45 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/sisanje-nula.jpg" alt="Šišanje na nulu">
-          </div>
-
-          <div class="service-content">
-            <h3>Šišanje na nulu</h3>
-            <p>Brzo šišanje mašinicom.</p>
-            <span>15 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/pranje.jpg" alt="Pranje kose">
-          </div>
-
-          <div class="service-content">
-            <h3>Pranje kose</h3>
-            <p>Pranje i priprema kose za stilizovanje.</p>
-            <span>15 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/feniranje.jpg" alt="Feniranje">
-          </div>
-
-          <div class="service-content">
-            <h3>Feniranje</h3>
-            <p>Profesionalno feniranje i oblikovanje frizure.</p>
-            <span>30 min</span>
-          </div>
-        </div>
-
-        <div class="service-card">
-          <div class="service-image">
-            <img src="images/farbanje.jpg" alt="Farbanje">
-          </div>
-
-          <div class="service-content">
-            <h3>Farbanje</h3>
-            <p>Farbanje i osvežavanje boje kose.</p>
-            <span>60 min</span>
-          </div>
-        </div>
-
-      </div>
+      <div class="services-grid collapsed" id="servicesGrid"></div>
 
       <div class="services-more">
-        <button class="btn btn-gold" id="toggleServicesBtn">
+        <button type="button" class="btn btn-dark" id="toggleServicesBtn">
           Prikaži sve usluge
         </button>
       </div>
+
+      <!-- <div class="services-more">
+        <button class="btn btn-gold" id="toggleServicesBtn">
+          Prikaži sve usluge
+        </button>
+      </div> -->
 
     </section>
 
@@ -318,7 +226,7 @@
         <h3>Prijava</h3>
         <form id="loginForm">
           <label>Email adresa</label>
-          <input id="loginEmail" type="email" placeholder="unesi email" required />
+          <input type="text" id="loginEmail" placeholder="Email ili admin korisničko ime" required>
           <label>Lozinka</label>
           <input id="loginPassword" type="password" placeholder="unesi lozinku" required />
           <div class="form-row">

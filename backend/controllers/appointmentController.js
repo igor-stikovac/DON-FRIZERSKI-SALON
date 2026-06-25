@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-
+const { sendAppointmentConfirmation } = require('../utils/email');
 const WORK_START = '10:00';
 
 function getWorkEndByDate(date) {
@@ -26,6 +26,22 @@ function minutesToTime(totalMinutes) {
   return `${hours}:${minutes}`;
 }
 
+function getTodayString() {
+  const today = new Date();
+
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentMinutes() {
+  const now = new Date();
+
+  return now.getHours() * 60 + now.getMinutes();
+}
+
 function overlaps(startA, endA, startB, endB) {
   return startA < endB && endA > startB;
 }
@@ -35,70 +51,101 @@ exports.getAvailableSlots = async (req, res) => {
     const { date, serviceId } = req.query;
 
     if (!date || !serviceId) {
-      return res.status(400).json({ message: 'Datum i usluga su obavezni.' });
+      return res.status(400).json({
+        message: 'Datum i usluga su obavezni.'
+      });
     }
 
+    const todayString = getTodayString();
+
+    if (date < todayString) {
+      return res.json({
+        availableSlots: []
+      });
+    }
+
+
     const serviceResult = await pool.query(
-      'SELECT duration_minutes FROM services WHERE id = $1',
+      `SELECT duration_minutes
+       FROM services
+       WHERE id = $1
+       AND is_active = true`,
       [serviceId]
     );
 
     if (serviceResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Usluga nije pronađena.' });
+      return res.status(404).json({
+        message: 'Usluga nije pronađena.'
+      });
     }
 
-    const duration = serviceResult.rows[0].duration_minutes;
-
-    const appointmentsResult = await pool.query(
-      `SELECT start_time, end_time
-       FROM appointments
-       WHERE appointment_date = $1
-       AND status = 'booked'`,
-      [date]
-    );
-
-    const booked = appointmentsResult.rows.map(row => ({
-      start: timeToMinutes(row.start_time.slice(0, 5)),
-      end: timeToMinutes(row.end_time.slice(0, 5))
-    }));
-    
     const workEnd = getWorkEndByDate(date);
 
     if (!workEnd) {
-      return res.json({ availableSlots: [] });
+      return res.json({
+        availableSlots: []
+      });
     }
+
+    const duration = Number(serviceResult.rows[0].duration_minutes);
+
+    const appointmentsResult = await pool.query(
+      `
+      SELECT start_time, end_time
+      FROM appointments
+      WHERE appointment_date = $1
+      AND status = 'booked'
+      `,
+      [date]
+    );
+
+    const blocksResult = await pool.query(
+      `
+      SELECT start_time, end_time
+      FROM blocked_slots
+      WHERE block_date = $1
+      `,
+      [date]
+    );
+
+    const unavailable = [
+      ...appointmentsResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      })),
+
+      ...blocksResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      }))
+    ];
 
     const startDay = timeToMinutes(WORK_START);
     const endDay = timeToMinutes(workEnd);
 
-    // const availableSlots = [];
+    const currentMinutes = getCurrentMinutes();
 
-    // for (let start = startDay; start + duration <= endDay; start += STEP_MINUTES) {
-    //   const end = start + duration;
-
-    //   const isBusy = booked.some(b =>
-    //     overlaps(start, end, b.start - BUFFER_MINUTES, b.end + BUFFER_MINUTES)
-    //   );
-
-    //   if (!isBusy) {
-    //     availableSlots.push({
-    //       start: minutesToTime(start),
-    //       end: minutesToTime(end)
-    //     });
-    //   }
-    // }
+    const minStart =
+      date === todayString
+        ? Math.max(startDay, currentMinutes + BUFFER_MINUTES)
+        : startDay;
 
     const candidateStarts = new Set();
 
-    for (let start = startDay; start + duration <= endDay; start += DEFAULT_STEP_MINUTES) {
-      candidateStarts.add(start);
+    for (
+      let start = startDay;
+      start + duration <= endDay;
+      start += DEFAULT_STEP_MINUTES
+    ) {
+      if (start >= minStart) {
+        candidateStarts.add(start);
+      }
     }
 
-    /* dodatni termini posle već zakazanih termina */
-    booked.forEach(b => {
-      const candidate = b.end + BUFFER_MINUTES;
+    unavailable.forEach(slot => {
+      const candidate = slot.end + BUFFER_MINUTES;
 
-      if (candidate + duration <= endDay) {
+      if (candidate >= minStart && candidate + duration <= endDay) {
         candidateStarts.add(candidate);
       }
     });
@@ -110,16 +157,16 @@ exports.getAvailableSlots = async (req, res) => {
       .forEach(start => {
         const end = start + duration;
 
-        const isBusy = booked.some(b =>
-          overlaps(
+        const isUnavailable = unavailable.some(slot => {
+          return overlaps(
             start,
             end,
-            b.start - BUFFER_MINUTES,
-            b.end + BUFFER_MINUTES
-          )
-        );
+            slot.start - BUFFER_MINUTES,
+            slot.end + BUFFER_MINUTES
+          );
+        });
 
-        if (!isBusy) {
+        if (!isUnavailable) {
           availableSlots.push({
             start: minutesToTime(start),
             end: minutesToTime(end)
@@ -127,10 +174,15 @@ exports.getAvailableSlots = async (req, res) => {
         }
       });
 
-    res.json({ availableSlots });
+    res.json({
+      availableSlots
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Greška pri učitavanju termina.' });
+    res.status(500).json({
+      message: 'Greška pri učitavanju slobodnih termina.'
+    });
   }
 };
 
@@ -144,7 +196,10 @@ exports.createAppointment = async (req, res) => {
     }
 
     const serviceResult = await pool.query(
-      'SELECT duration_minutes FROM services WHERE id = $1',
+      `SELECT id, name, duration_minutes, price
+      FROM services
+      WHERE id = $1
+      AND is_active = true`,
       [serviceId]
     );
 
@@ -152,7 +207,8 @@ exports.createAppointment = async (req, res) => {
       return res.status(404).json({ message: 'Usluga nije pronađena.' });
     }
 
-    const duration = serviceResult.rows[0].duration_minutes;
+    const service = serviceResult.rows[0];
+    const duration = Number(service.duration_minutes);
 
     const workEnd = getWorkEndByDate(date);
 
@@ -164,6 +220,20 @@ exports.createAppointment = async (req, res) => {
 
     const startMinutes = timeToMinutes(time);
     const endMinutes = startMinutes + duration;
+
+    const todayString = getTodayString();
+
+    if (date < todayString) {
+      return res.status(400).json({
+        message: 'Ne možete zakazati termin u prošlosti.'
+      });
+    }
+
+    if (date === todayString && startMinutes < getCurrentMinutes() + BUFFER_MINUTES) {
+      return res.status(400).json({
+        message: 'Ne možete zakazati termin koji je već prošao.'
+      });
+    }
 
     const startDay = timeToMinutes(WORK_START);
     const endDay = timeToMinutes(workEnd);
@@ -182,15 +252,30 @@ exports.createAppointment = async (req, res) => {
       [date]
     );
 
-    const hasOverlap = bookedResult.rows.some(row => {
-      const bookedStart = timeToMinutes(row.start_time.slice(0, 5));
-      const bookedEnd = timeToMinutes(row.end_time.slice(0, 5));
+    const blocksResult = await pool.query(
+      `SELECT start_time, end_time
+      FROM blocked_slots
+      WHERE block_date = $1`,
+      [date]
+    );
 
+    const unavailable = [
+      ...bookedResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      })),
+      ...blocksResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      }))
+    ];
+
+    const hasOverlap = unavailable.some(slot => {
       return overlaps(
         startMinutes,
         endMinutes,
-        bookedStart - BUFFER_MINUTES,
-        bookedEnd + BUFFER_MINUTES
+        slot.start - BUFFER_MINUTES,
+        slot.end + BUFFER_MINUTES
       );
     });
 
@@ -212,6 +297,33 @@ exports.createAppointment = async (req, res) => {
       ]
     );
 
+    try {
+      const userResult = await pool.query(
+        `SELECT first_name, email
+        FROM users
+        WHERE id = $1`,
+        [userId]
+      );
+
+      const user = userResult.rows[0];
+
+      if (user && user.email) {
+        await sendAppointmentConfirmation({
+          to: user.email,
+          firstName: user.first_name,
+          serviceName: service.name,
+          date,
+          startTime: minutesToTime(startMinutes),
+          endTime: minutesToTime(endMinutes),
+          price: service.price
+        });
+      }
+
+    } catch (emailError) {
+        console.error('Termin je zakazan, ali email nije poslat:', emailError.message);
+    }
+  
+
     res.status(201).json({
       message: 'Uspešno ste zakazali termin.',
       appointment: result.rows[0]
@@ -229,7 +341,7 @@ exports.getMyAppointments = async (req, res) => {
     const result = await pool.query(
       `SELECT 
           a.id,
-          a.appointment_date,
+          TO_CHAR(a.appointment_date, 'YYYY-MM-DD') AS appointment_date,
           a.start_time,
           a.end_time,
           a.status,
