@@ -77,6 +77,58 @@ async function sendAppointmentConfirmation({
   });
 }
 
+async function sendAdminAppointmentNotification({
+  customerName,
+  customerEmail,
+  customerPhone,
+  serviceName,
+  date,
+  startTime,
+  endTime,
+  price
+}) {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.log('Email podešavanja nisu uneta. Preskačem slanje admin emaila.');
+    return;
+  }
+
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!adminEmail) {
+    console.log('ADMIN_EMAIL nije podešen u .env fajlu.');
+    return;
+  }
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to: adminEmail,
+    subject: 'Novi zakazan termin - DON Hair Studio',
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+        <h2>Novi zakazan termin</h2>
+
+        <div style="padding: 16px; background: #f8fafc; border-radius: 12px; margin: 20px 0;">
+          <p><strong>Mušterija:</strong> ${customerName}</p>
+          <p><strong>Email:</strong> ${customerEmail}</p>
+          <p><strong>Telefon:</strong> ${customerPhone || '-'}</p>
+
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">
+
+          <p><strong>Usluga:</strong> ${serviceName}</p>
+          <p><strong>Datum:</strong> ${formatDateForEmail(date)}</p>
+          <p><strong>Vreme:</strong> ${startTime} - ${endTime}</p>
+          <p><strong>Cena:</strong> ${price || 0} RSD</p>
+        </div>
+
+        <p>Termin je dodat u sistem.</p>
+      </div>
+    `
+  });
+}
+
 module.exports = {
-  sendAppointmentConfirmation
+  sendAppointmentConfirmation,
+  sendAdminAppointmentNotification
 };

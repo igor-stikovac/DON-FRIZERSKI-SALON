@@ -12,8 +12,57 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 <body>
-  
   <header class="site-header">
+    <a class="logo logo-image" href="#home">
+      <img src="images/logo-hed.png" alt="DON Hair Studio">
+    </a>
+
+    <button class="menu-btn" id="menuBtn" type="button">
+      ☰
+    </button>
+
+    <nav class="nav" id="navMenu">
+      <a href="#home" class="active">Početna</a>
+      <a href="#services">Usluge</a>
+      <a href="#booking">Zakazivanje</a>
+      <a href="#about">O nama</a>
+      <a href="#contact">Kontakt</a>
+
+      <div class="mobile-menu-actions">
+        <a href="admin.html" class="mobile-admin-link" id="mobileAdminNavBtn" style="display:none">
+          ⚙️ Admin panel
+        </a>
+
+        <a href="profile.html" class="mobile-profile-link">
+          <i class="fas fa-user"></i>
+          Moj profil
+        </a>
+
+        <a href="#booking" class="btn btn-gold mobile-booking-btn">
+          Zakaži termin
+        </a>
+
+        <button type="button" class="mobile-logout-btn" id="mobileLogoutBtn" style="display:none">
+          Odjavi se
+        </button>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
+        ⚙️
+      </a>
+
+      <a href="profile.html" class="profile-link">
+        <i class="fas fa-user"></i>
+      </a>
+
+      <a href="#booking" class="btn btn-gold">
+        Zakaži termin
+      </a>
+    </div>
+  </header>
+  <!-- <header class="site-header">
     <a class="logo logo-image" href="#home">
       <img src="images/logo-hed.png" alt="DON Hair Studio">
     </a>
@@ -40,7 +89,7 @@
       <a href="#booking" class="btn btn-gold">Zakaži termin</a>
     </div>
     
-  </header>
+  </header> -->
 
   <main>
     <section class="hero" id="home">

@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 
 <body>
@@ -30,7 +32,7 @@
     </div>
   </header> -->
 
-  <header class="site-header">
+  <!-- <header class="site-header">
 
     <a class="logo" href="index.html#home">
       <img src="images/logo-hed.png" alt="DON Hair Studio">
@@ -74,8 +76,57 @@
 
     </div>
 
-  </header>
+  </header> -->
+  <header class="site-header">
+    <a class="logo logo-image" href="#home">
+      <img src="images/logo-hed.png" alt="DON Hair Studio">
+    </a>
 
+    <button class="menu-btn" id="menuBtn" type="button">
+      ☰
+    </button>
+
+    <nav class="nav" id="navMenu">
+      <a href="index.html#home" class="active">Početna</a>
+      <a href="index.html#services">Usluge</a>
+      <a href="index.html#booking">Zakazivanje</a>
+      <a href="index.html#about">O nama</a>
+      <a href="index.html#contact">Kontakt</a>
+
+      <div class="mobile-menu-actions">
+        <a href="admin.html" class="mobile-admin-link" id="mobileAdminNavBtn" style="display:none">
+          ⚙️ Admin panel
+        </a>
+
+        <a href="profile.html" class="mobile-profile-link">
+          <i class="fas fa-user"></i>
+          Moj profil
+        </a>
+
+        <a href="index.html#booking" class="btn btn-gold mobile-booking-btn">
+          Zakaži termin
+        </a>
+
+        <button type="button" class="mobile-logout-btn" id="mobileLogoutBtn" style="display:none">
+          Odjavi se
+        </button>
+      </div>
+    </nav>
+
+    <div class="header-actions">
+      <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
+        ⚙️
+      </a>
+
+      <a href="profile.html" class="profile-link">
+        <i class="fas fa-user"></i>
+      </a>
+
+      <a href="index.html#booking" class="btn btn-gold">
+        Zakaži termin
+      </a>
+    </div>
+  </header>
   <main class="profile-page">
 
     <section id="profileAuthBlock" class="profile-auth-card">

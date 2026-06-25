@@ -1,7 +1,9 @@
 const pool = require('../config/db');
-const { sendAppointmentConfirmation } = require('../utils/email');
 const WORK_START = '10:00';
-
+const {
+  sendAppointmentConfirmation,
+  sendAdminAppointmentNotification
+} = require('../utils/email');
 function getWorkEndByDate(date) {
   const day = new Date(`${date}T00:00:00`).getDay();
 
@@ -192,19 +194,23 @@ exports.createAppointment = async (req, res) => {
     const { serviceId, date, time } = req.body;
 
     if (!serviceId || !date || !time) {
-      return res.status(400).json({ message: 'Usluga, datum i vreme su obavezni.' });
+      return res.status(400).json({
+        message: 'Usluga, datum i vreme su obavezni.'
+      });
     }
 
     const serviceResult = await pool.query(
       `SELECT id, name, duration_minutes, price
-      FROM services
-      WHERE id = $1
-      AND is_active = true`,
+       FROM services
+       WHERE id = $1
+       AND is_active = true`,
       [serviceId]
     );
 
     if (serviceResult.rows.length === 0) {
-      return res.status(404).json({ message: 'Usluga nije pronađena.' });
+      return res.status(404).json({
+        message: 'Usluga nije pronađena.'
+      });
     }
 
     const service = serviceResult.rows[0];
@@ -242,7 +248,7 @@ exports.createAppointment = async (req, res) => {
       return res.status(400).json({
         message: 'Izabrani termin nije u okviru radnog vremena.'
       });
-}
+    }
 
     const bookedResult = await pool.query(
       `SELECT start_time, end_time
@@ -254,8 +260,8 @@ exports.createAppointment = async (req, res) => {
 
     const blocksResult = await pool.query(
       `SELECT start_time, end_time
-      FROM blocked_slots
-      WHERE block_date = $1`,
+       FROM blocked_slots
+       WHERE block_date = $1`,
       [date]
     );
 
@@ -280,7 +286,9 @@ exports.createAppointment = async (req, res) => {
     });
 
     if (hasOverlap) {
-      return res.status(409).json({ message: 'Termin više nije slobodan.' });
+      return res.status(409).json({
+        message: 'Termin više nije slobodan.'
+      });
     }
 
     const result = await pool.query(
@@ -299,13 +307,17 @@ exports.createAppointment = async (req, res) => {
 
     try {
       const userResult = await pool.query(
-        `SELECT first_name, email
-        FROM users
-        WHERE id = $1`,
+        `SELECT first_name, last_name, phone, email
+         FROM users
+         WHERE id = $1`,
         [userId]
       );
 
       const user = userResult.rows[0];
+
+      const customerName = user
+        ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+        : 'Nepoznata mušterija';
 
       if (user && user.email) {
         await sendAppointmentConfirmation({
@@ -319,18 +331,34 @@ exports.createAppointment = async (req, res) => {
         });
       }
 
+      await sendAdminAppointmentNotification({
+        customerName,
+        customerEmail: user?.email || '-',
+        customerPhone: user?.phone || '-',
+        serviceName: service.name,
+        date,
+        startTime: minutesToTime(startMinutes),
+        endTime: minutesToTime(endMinutes),
+        price: service.price
+      });
+
     } catch (emailError) {
-        console.error('Termin je zakazan, ali email nije poslat:', emailError.message);
+      console.error(
+        'Termin je zakazan, ali jedan od emailova nije poslat:',
+        emailError.message
+      );
     }
-  
 
     res.status(201).json({
       message: 'Uspešno ste zakazali termin.',
       appointment: result.rows[0]
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Greška pri zakazivanju termina.' });
+    res.status(500).json({
+      message: 'Greška pri zakazivanju termina.'
+    });
   }
 };
 

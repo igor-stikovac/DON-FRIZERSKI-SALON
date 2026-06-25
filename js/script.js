@@ -16,7 +16,13 @@ if (logoutMessage) {
 }
 
 menuBtn?.addEventListener('click', () => {
-  navMenu.classList.toggle('open');
+  navMenu?.classList.toggle('show');
+});
+
+document.querySelectorAll('#navMenu a').forEach(link => {
+  link.addEventListener('click', () => {
+    navMenu?.classList.remove('show');
+  });
 });
 
 function setMessage(element, text, type = 'success') {
@@ -66,6 +72,8 @@ function renderUserStatus() {
   const profileBtn = document.getElementById('profileNavBtn');
   const logoutBtn = document.getElementById('logoutProfileBtn');
   const adminBtn = document.getElementById('adminNavBtn');
+  const mobileAdminBtn = document.getElementById('mobileAdminNavBtn');
+  const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
   if (user) {
     if (loginBtn) loginBtn.style.display = 'none';
@@ -83,12 +91,18 @@ function renderUserStatus() {
       logoutBtn.style.display = 'inline-flex';
     }
 
+    const role = String(user.role || '').trim().toLowerCase();
+
     if (adminBtn) {
-      if (user.role === 'admin') {
-        adminBtn.style.display = 'inline-flex';
-      } else {
-        adminBtn.style.display = 'none';
-      }
+      adminBtn.style.display = role === 'admin' ? 'inline-flex' : 'none';
+    }
+
+    if (mobileAdminBtn) {
+      mobileAdminBtn.style.display = role === 'admin' ? 'inline-flex' : 'none';
+    }
+
+    if (mobileLogoutBtn) {
+      mobileLogoutBtn.classList.add('show-mobile-logout');
     }
 
   } else {
@@ -96,6 +110,10 @@ function renderUserStatus() {
     if (profileBtn) profileBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'none';
     if (adminBtn) adminBtn.style.display = 'none';
+    if (mobileAdminBtn) mobileAdminBtn.style.display = 'none';
+    if (mobileLogoutBtn) {
+      mobileLogoutBtn.classList.remove('show-mobile-logout');
+    }
   }
 }
 
@@ -1125,6 +1143,13 @@ async function loadHomepageServicesCards() {
     servicesGrid.innerHTML = '<p>Backend nije dostupan.</p>';
   }
 }
+
+document.getElementById('mobileLogoutBtn')?.addEventListener('click', () => {
+  localStorage.removeItem('don_token');
+  localStorage.removeItem('don_user');
+
+  window.location.href = 'index.html';
+});
 
 renderUserStatus();
 loadHomepageServicesCards();
