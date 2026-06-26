@@ -2,8 +2,11 @@ const pool = require('../config/db');
 const WORK_START = '10:00';
 const {
   sendAppointmentConfirmation,
-  sendAdminAppointmentNotification
+  sendAdminAppointmentNotification,
+  sendAdminCancellationNotification,
+  sendCustomerCancellationNotification
 } = require('../utils/email');
+
 function getWorkEndByDate(date) {
   const day = new Date(`${date}T00:00:00`).getDay();
 
@@ -393,63 +396,193 @@ exports.getMyAppointments = async (req, res) => {
 exports.cancelAppointment = async (req, res) => {
   try {
     const userId = req.user.id;
-    const appointmentId = req.params.id;
+    const { id } = req.params;
 
-    const result = await pool.query(
-      `SELECT 
-          a.id,
-          a.appointment_date,
-          a.status,
-          s.price
-       FROM appointments a
-       JOIN services s ON a.service_id = s.id
-       WHERE a.id = $1 AND a.user_id = $2`,
-      [appointmentId, userId]
+    const appointmentResult = await pool.query(
+      `
+      SELECT 
+        a.id,
+        TO_CHAR(a.appointment_date, 'YYYY-MM-DD') AS appointment_date,
+        a.start_time,
+        a.end_time,
+        a.status,
+        s.name AS service_name,
+        s.price,
+        u.first_name,
+        u.last_name,
+        u.email,
+        u.phone
+      FROM appointments a
+      JOIN services s ON s.id = a.service_id
+      JOIN users u ON u.id = a.user_id
+      WHERE a.id = $1
+      AND a.user_id = $2
+      `,
+      [id, userId]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'Termin nije pronađen.' });
+    if (appointmentResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Termin nije pronađen.'
+      });
     }
 
-    const appointment = result.rows[0];
+    const appointment = appointmentResult.rows[0];
 
-    if (appointment.status === 'cancelled') {
-      return res.status(400).json({ message: 'Termin je već otkazan.' });
+    if (appointment.status !== 'booked') {
+      return res.status(400).json({
+        message: 'Termin je već otkazan.'
+      });
     }
 
     const today = new Date();
+    const appointmentDate = new Date(`${appointment.appointment_date}T00:00:00`);
+
     today.setHours(0, 0, 0, 0);
 
-    const appointmentDate = new Date(appointment.appointment_date);
-    appointmentDate.setHours(0, 0, 0, 0);
-
-    const diffDays = Math.round((appointmentDate - today) / (1000 * 60 * 60 * 24));
-
-    let fee = 0;
-
-    if (diffDays === 0) {
-      fee = appointment.price;
-    } else if (diffDays === 1) {
-      fee = Math.round(appointment.price * 0.8);
-    }
-
-    await pool.query(
-      `UPDATE appointments
-       SET status = 'cancelled',
-           cancellation_fee = $1,
-           cancelled_at = CURRENT_TIMESTAMP
-       WHERE id = $2`,
-      [fee, appointmentId]
+    const diffDays = Math.round(
+      (appointmentDate - today) / (1000 * 60 * 60 * 24)
     );
 
+    let cancellationFee = 0;
+
+    if (diffDays === 0) {
+      cancellationFee = Number(appointment.price || 0);
+    } else if (diffDays === 1) {
+      cancellationFee = Math.round(Number(appointment.price || 0) * 0.8);
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE appointments
+      SET status = 'cancelled',
+          cancellation_fee = $1,
+          cancelled_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      AND user_id = $3
+      RETURNING *
+      `,
+      [cancellationFee, id, userId]
+    );
+
+    try {
+      const customerName =
+        `${appointment.first_name || ''} ${appointment.last_name || ''}`.trim();
+
+      await sendAdminCancellationNotification({
+        customerName,
+        customerEmail: appointment.email,
+        customerPhone: appointment.phone,
+        serviceName: appointment.service_name,
+        date: appointment.appointment_date,
+        startTime: appointment.start_time.slice(0, 5),
+        endTime: appointment.end_time.slice(0, 5),
+        cancellationFee
+      });
+
+    } catch (emailError) {
+      console.error(
+        'Termin je otkazan, ali admin email nije poslat:',
+        emailError.message
+      );
+    }
+
     res.json({
-      message: fee > 0
-        ? `Termin je otkazan. Naknada za otkazivanje je ${fee} RSD.`
-        : 'Termin je uspešno otkazan bez naknade.',
-      cancellationFee: fee
+      message:
+        cancellationFee > 0
+          ? `Termin je otkazan. Naknada za otkazivanje je ${cancellationFee} RSD.`
+          : 'Termin je otkazan bez naknade.',
+      appointment: result.rows[0]
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Greška pri otkazivanju termina.' });
+    res.status(500).json({
+      message: 'Greška pri otkazivanju termina.'
+    });
+  }
+};
+
+exports.cancelAppointmentByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const appointmentResult = await pool.query(
+      `
+      SELECT 
+        a.id,
+        TO_CHAR(a.appointment_date, 'YYYY-MM-DD') AS appointment_date,
+        a.start_time,
+        a.end_time,
+        a.status,
+        a.manual_customer_name,
+        a.manual_customer_phone,
+        s.name AS service_name,
+        u.first_name,
+        u.last_name,
+        u.email
+      FROM appointments a
+      LEFT JOIN services s ON s.id = a.service_id
+      LEFT JOIN users u ON u.id = a.user_id
+      WHERE a.id = $1
+      `,
+      [id]
+    );
+
+    if (appointmentResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Termin nije pronađen.'
+      });
+    }
+
+    const appointment = appointmentResult.rows[0];
+
+    if (appointment.status !== 'booked') {
+      return res.status(400).json({
+        message: 'Termin je već otkazan.'
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE appointments
+      SET status = 'cancelled',
+          cancellation_fee = 0,
+          cancelled_at = CURRENT_TIMESTAMP
+      WHERE id = $1
+      RETURNING *
+      `,
+      [id]
+    );
+
+    try {
+      if (appointment.email) {
+        await sendCustomerCancellationNotification({
+          to: appointment.email,
+          firstName: appointment.first_name,
+          serviceName: appointment.service_name,
+          date: appointment.appointment_date,
+          startTime: appointment.start_time.slice(0, 5),
+          endTime: appointment.end_time.slice(0, 5),
+          cancellationFee: 0
+        });
+      }
+    } catch (emailError) {
+      console.error(
+        'Termin je otkazan, ali email mušteriji nije poslat:',
+        emailError.message
+      );
+    }
+
+    res.json({
+      message: 'Termin je otkazan.',
+      appointment: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri admin otkazivanju termina.'
+    });
   }
 };

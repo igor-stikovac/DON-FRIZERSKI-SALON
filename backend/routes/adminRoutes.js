@@ -15,7 +15,13 @@ const {
   createServiceByAdmin,
   updateServiceByAdmin,
   deleteServiceByAdmin,
-  getAdminStats
+  toggleServiceStatusByAdmin,
+  getAdminStats,
+  getSiteSettings,
+  updateSiteSettings,
+  getClosedDays,
+  createClosedDay,
+  deleteClosedDay
 } = require('../controllers/adminController');
 
 router.get(
@@ -93,6 +99,48 @@ router.get(
   authMiddleware,
   adminMiddleware,
   getAdminStats
+);
+
+router.patch(
+  '/services/:id/toggle',
+  authMiddleware,
+  adminMiddleware,
+  toggleServiceStatusByAdmin
+);
+
+router.get(
+  '/settings',
+  authMiddleware,
+  adminMiddleware,
+  getSiteSettings
+);
+
+router.put(
+  '/settings',
+  authMiddleware,
+  adminMiddleware,
+  updateSiteSettings
+);
+
+router.get(
+  '/closed-days',
+  authMiddleware,
+  adminMiddleware,
+  getClosedDays
+);
+
+router.post(
+  '/closed-days',
+  authMiddleware,
+  adminMiddleware,
+  createClosedDay
+);
+
+router.delete(
+  '/closed-days/:id',
+  authMiddleware,
+  adminMiddleware,
+  deleteClosedDay
 );
 
 module.exports = router;

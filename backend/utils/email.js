@@ -128,7 +128,108 @@ async function sendAdminAppointmentNotification({
   });
 }
 
+async function sendAdminCancellationNotification({
+  customerName,
+  customerEmail,
+  customerPhone,
+  serviceName,
+  date,
+  startTime,
+  endTime,
+  cancellationFee
+}) {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.log('Email podešavanja nisu uneta. Preskačem admin email za otkazivanje.');
+    return;
+  }
+
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  if (!adminEmail) {
+    console.log('ADMIN_EMAIL nije podešen u .env fajlu.');
+    return;
+  }
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to: adminEmail,
+    subject: 'Termin je otkazan - DON Hair Studio',
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+        <h2>Termin je otkazan</h2>
+
+        <div style="padding: 16px; background: #f8fafc; border-radius: 12px; margin: 20px 0;">
+          <p><strong>Mušterija:</strong> ${customerName}</p>
+          <p><strong>Email:</strong> ${customerEmail || '-'}</p>
+          <p><strong>Telefon:</strong> ${customerPhone || '-'}</p>
+
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;">
+
+          <p><strong>Usluga:</strong> ${serviceName}</p>
+          <p><strong>Datum:</strong> ${formatDateForEmail(date)}</p>
+          <p><strong>Vreme:</strong> ${startTime} - ${endTime}</p>
+          <p><strong>Naknada:</strong> ${cancellationFee || 0} RSD</p>
+        </div>
+
+        <p>Termin je otkazala mušterija.</p>
+      </div>
+    `
+  });
+}
+
+async function sendCustomerCancellationNotification({
+  to,
+  firstName,
+  serviceName,
+  date,
+  startTime,
+  endTime,
+  cancellationFee
+}) {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.log('Email podešavanja nisu uneta. Preskačem email mušteriji za otkazivanje.');
+    return;
+  }
+
+  if (!to) return;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to,
+    subject: 'Vaš termin je otkazan - DON Hair Studio',
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+        <h2>DON Hair Studio</h2>
+
+        <p>Zdravo ${firstName || ''},</p>
+
+        <p>Vaš termin je otkazan.</p>
+
+        <div style="padding: 16px; background: #f8fafc; border-radius: 12px; margin: 20px 0;">
+          <p><strong>Usluga:</strong> ${serviceName}</p>
+          <p><strong>Datum:</strong> ${formatDateForEmail(date)}</p>
+          <p><strong>Vreme:</strong> ${startTime} - ${endTime}</p>
+          <p><strong>Naknada:</strong> ${cancellationFee || 0} RSD</p>
+        </div>
+
+        <p>Ako imate pitanje, možete kontaktirati salon.</p>
+
+        <p>
+          Srdačno,<br>
+          <strong>DON Hair Studio</strong>
+        </p>
+      </div>
+    `
+  });
+}
+
 module.exports = {
   sendAppointmentConfirmation,
-  sendAdminAppointmentNotification
+  sendAdminAppointmentNotification,
+  sendAdminCancellationNotification,
+  sendCustomerCancellationNotification
 };

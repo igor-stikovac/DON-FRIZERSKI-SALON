@@ -265,7 +265,7 @@ async function loadAdminAppointments() {
         <div class="admin-appointment-info">
           <p><strong>Mušterija:</strong> ${customerName}</p>
           <p><strong>Telefon:</strong> ${customerPhone}</p>
-          <p><strong>Email:</strong> ${app.email || '-'}</p>
+          <p><strong>Email:</strong> ${app.manual_customer_email || app.email || '-'}</p>
           <p><strong>Cena:</strong> ${app.price || 0} RSD</p>
           ${
             app.note
@@ -394,6 +394,7 @@ document
     const payload = {
       customerName: document.getElementById('manualCustomerName').value.trim(),
       customerPhone: document.getElementById('manualCustomerPhone').value.trim(),
+      customerEmail: document.getElementById('manualCustomerEmail').value.trim(),
       serviceId: manualService.value,
       date: selectedDate,
       time: document.getElementById('manualTime').value,
@@ -533,13 +534,24 @@ async function loadAdminServicesPanel() {
       const card = document.createElement('div');
       card.className = 'admin-service-card';
 
+      card.classList.toggle('inactive', !service.is_active);
+      card.dataset.active = service.is_active ? 'true' : 'false';
+
       card.innerHTML = `
         <div>
-          <h3>${service.name}</h3>
-          <p>${service.duration_minutes} min | ${service.price} RSD</p>
-          <span class="${service.is_active ? 'service-active' : 'service-inactive'}">
+          <span class="admin-service-status ${service.is_active ? 'active' : 'inactive'}">
             ${service.is_active ? 'Aktivna' : 'Neaktivna'}
           </span>
+
+          <h3>${service.name}</h3>
+
+          <p>
+            <strong>Trajanje:</strong> ${service.duration_minutes} min
+          </p>
+
+          <p>
+            <strong>Cena:</strong> ${service.price} RSD
+          </p>
         </div>
 
         <div class="admin-service-actions">
@@ -547,11 +559,11 @@ async function loadAdminServicesPanel() {
             Izmeni
           </button>
 
-          <button class="btn btn-dark delete-service-btn" data-id="${service.id}">
-            Deaktiviraj
+          <button class="btn btn-dark toggle-service-btn" data-id="${service.id}">
+            ${service.is_active ? 'Deaktiviraj' : 'Aktiviraj'}
           </button>
         </div>
-      `;
+      `;  
 
       adminServicesList.appendChild(card);
 
@@ -562,8 +574,8 @@ async function loadAdminServicesPanel() {
         document.getElementById('adminServicePrice').value = service.price;
       });
 
-      card.querySelector('.delete-service-btn').addEventListener('click', async () => {
-        await deactivateService(service.id);
+      card.querySelector('.toggle-service-btn').addEventListener('click', async () => {
+        await toggleServiceStatus(service.id);
       });
     });
 
@@ -831,8 +843,131 @@ function paintCalendarStats() {
   });
 }
 
+async function toggleServiceStatus(id) {
+  const confirmed = confirm('Da li želiš da promeniš status ove usluge?');
+
+  if (!confirmed) return;
+
+  const response = await fetch(`${API_URL}/admin/services/${id}/toggle`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri promeni statusa usluge.',
+      'error'
+    );
+  }
+
+  showAdminMessage(data.message || 'Status usluge je promenjen.');
+
+  loadAdminServicesPanel();
+  loadAdminServices();
+}
+
+async function loadSiteSettings() {
+  try {
+    const response = await fetch(`${API_URL}/admin/settings`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return showAdminMessage(
+        data.message || 'Greška pri učitavanju podešavanja.',
+        'error'
+      );
+    }
+
+    const settings = data.settings || {};
+
+    document.getElementById('settingSalonPhone').value =
+      settings.salon_phone || '';
+
+    document.getElementById('settingSalonEmail').value =
+      settings.salon_email || '';
+
+    document.getElementById('settingSalonAddress').value =
+      settings.salon_address || '';
+
+    document.getElementById('settingSalonInstagram').value =
+      settings.salon_instagram || '';
+
+    document.getElementById('settingWorkMondayFriday').value =
+      settings.work_monday_friday || '';
+
+    document.getElementById('settingWorkSaturday').value =
+      settings.work_saturday || '';
+
+    document.getElementById('settingWorkSunday').value =
+      settings.work_sunday || '';
+
+  } catch (error) {
+    showAdminMessage(
+      'Backend nije dostupan za podešavanja.',
+      'error'
+    );
+  }
+}
+
+document.getElementById('settingsForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const payload = {
+    salon_phone: document.getElementById('settingSalonPhone').value.trim(),
+    salon_email: document.getElementById('settingSalonEmail').value.trim(),
+    salon_address: document.getElementById('settingSalonAddress').value.trim(),
+    salon_instagram: document.getElementById('settingSalonInstagram').value.trim(),
+    work_monday_friday: document.getElementById('settingWorkMondayFriday').value.trim(),
+    work_saturday: document.getElementById('settingWorkSaturday').value.trim(),
+    work_sunday: document.getElementById('settingWorkSunday').value.trim()
+  };
+
+  const response = await fetch(`${API_URL}/admin/settings`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return showAdminMessage(
+      data.message || 'Greška pri čuvanju podešavanja.',
+      'error'
+    );
+  }
+
+  showAdminMessage('Podešavanja su sačuvana.');
+});
+
+const adminMenuBtn = document.getElementById('adminMenuBtn');
+const adminNavMenu = document.getElementById('adminNavMenu');
+
+adminMenuBtn?.addEventListener('click', () => {
+  adminNavMenu?.classList.toggle('show');
+});
+
+document.getElementById('adminMobileLogoutBtn')?.addEventListener('click', () => {
+  localStorage.removeItem('don_token');
+  localStorage.removeItem('don_user');
+  window.location.href = 'index.html';
+});
+
 checkAdminAccess();
 renderAdminCalendar();
 loadAdminServices();
 loadAdminAppointments();
 loadAdminServicesPanel();
+loadSiteSettings();

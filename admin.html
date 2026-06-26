@@ -1,3 +1,4 @@
+[
 <!DOCTYPE html>
 <html lang="sr">
 <head>
@@ -9,7 +10,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" 
+    rel="stylesheet"
+  >
 </head>
 
 <body>
@@ -25,10 +29,20 @@
     </div>
   </a>
 
-  <nav class="nav">
+  <button class="menu-btn" id="adminMenuBtn" type="button">
+    ☰
+  </button>
+
+  <nav class="nav" id="adminNavMenu">
     <a href="index.html#home">Početna</a>
     <a href="index.html#services">Usluge</a>
     <a href="profile.html">Moj profil</a>
+
+    <div class="mobile-menu-actions">
+      <button type="button" class="mobile-logout-btn show-mobile-logout" id="adminMobileLogoutBtn">
+        Odjavi se
+      </button>
+    </div>
   </nav>
 
   <div class="header-actions">
@@ -48,7 +62,7 @@
     </div>
   </section>
 
-  <section class="admin-stats-grid">
+  <!-- <section class="admin-stats-grid">
 
     <div class="admin-stat-card">
       <span>Danas zakazano</span>
@@ -70,11 +84,10 @@
       <strong id="statBlocksToday">0</strong>
     </div>
 
-  </section>
+  </section> -->
 
   <section class="admin-main-grid">
 
-    
     <div class="admin-calendar-panel">
 
       <div class="admin-calendar-header">
@@ -112,21 +125,70 @@
         <button type="button" class="admin-tab active" data-admin-tab="appointments">
           Termini
         </button>
+
         <button type="button" class="admin-tab" data-admin-tab="manual">
           Dodaj termin
         </button>
+
         <button type="button" class="admin-tab" data-admin-tab="block">
           Blokiraj vreme
         </button>
+
         <button type="button" class="admin-tab" data-admin-tab="services">
           Usluge
         </button>
+
+        <button type="button" class="admin-tab" data-admin-tab="closed">
+          Neradni dani
+        </button>
+
+        <button type="button" class="admin-tab" data-admin-tab="settings">
+          Podešavanja
+        </button>
+
+
       </div>
 
+      <!-- TERMINI -->
       <div class="admin-tab-content active" id="appointmentsTab">
         <div id="adminAppointmentsList"></div>
       </div>
 
+      <!-- PODEŠAVANJA -->
+      <div class="admin-tab-content" id="settingsTab">
+
+        <form id="settingsForm" class="admin-form">
+
+          <label>Telefon salona</label>
+          <input type="text" id="settingSalonPhone">
+
+          <label>Email salona</label>
+          <input type="email" id="settingSalonEmail">
+
+          <label>Adresa salona</label>
+          <input type="text" id="settingSalonAddress">
+
+          <label>Instagram link</label>
+          <input type="text" id="settingSalonInstagram">
+
+          <label>Radno vreme ponedeljak - petak</label>
+          <input type="text" id="settingWorkMondayFriday">
+
+          <label>Radno vreme subota</label>
+          <input type="text" id="settingWorkSaturday">
+
+          <label>Nedelja</label>
+          <input type="text" id="settingWorkSunday">
+
+          <button type="submit" class="btn btn-gold admin-submit-btn">
+            Sačuvaj podešavanja
+          </button>
+
+        </form>
+
+      </div>
+
+      <!-- FORMA ZA IZMENU TERMINA -->
       <div id="editAppointmentBox" class="admin-edit-box" style="display:none;">
 
         <h3>Izmeni termin</h3>
@@ -167,6 +229,7 @@
 
       </div>
 
+      <!-- RUČNO DODAVANJE TERMINA -->
       <div class="admin-tab-content" id="manualTab">
 
         <form id="manualAppointmentForm" class="admin-form">
@@ -176,6 +239,9 @@
 
           <label>Telefon</label>
           <input type="text" id="manualCustomerPhone">
+
+          <label>Email mušterije</label>
+          <input type="email" id="manualCustomerEmail" placeholder="email@example.com">
 
           <label>Usluga</label>
           <select id="manualService" required>
@@ -196,6 +262,7 @@
 
       </div>
 
+      <!-- BLOKIRANJE VREMENA -->
       <div class="admin-tab-content" id="blockTab">
 
         <form id="blockTimeForm" class="admin-form">
@@ -207,7 +274,11 @@
           <input type="time" id="blockEndTime" required>
 
           <label>Razlog</label>
-          <textarea id="blockReason" rows="3" placeholder="Pauza, privatna obaveza, neradan deo dana..."></textarea>
+          <textarea 
+            id="blockReason" 
+            rows="3" 
+            placeholder="Pauza, privatna obaveza, neradan deo dana..."
+          ></textarea>
 
           <button type="submit" class="btn btn-dark admin-submit-btn">
             Blokiraj vreme
@@ -216,7 +287,8 @@
         </form>
 
       </div>
-        
+
+      <!-- USLUGE -->
       <div class="admin-tab-content" id="servicesTab">
 
         <form id="adminServiceForm" class="admin-form">
@@ -245,7 +317,6 @@
         <div id="adminServicesList" class="admin-services-list"></div>
 
       </div>
-      
 
       <p id="adminMessage" class="auth-message"></p>
 
@@ -258,4 +329,5 @@
 <script src="js/admin.js"></script>
 
 </body>
-</html>
+</html>]
+

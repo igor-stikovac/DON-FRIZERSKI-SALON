@@ -3,6 +3,10 @@ const pool = require('../config/db');
 const WORK_START = '10:00';
 const BUFFER_MINUTES = 5;
 
+const {
+  sendAppointmentConfirmation
+} = require('../utils/email');
+
 function timeToMinutes(time) {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
@@ -50,6 +54,7 @@ exports.getAppointmentsByDate = async (req, res) => {
         a.cancellation_fee,
         a.manual_customer_name,
         a.manual_customer_phone,
+        a.manual_customer_email,
         a.note,
 
         u.first_name,
@@ -129,22 +134,25 @@ exports.cancelAppointmentByAdmin = async (req, res) => {
 exports.createManualAppointment = async (req, res) => {
   try {
     const {
+      customerName,
+      customerPhone,
+      customerEmail,
       serviceId,
       date,
       time,
-      customerName,
-      customerPhone,
       note
     } = req.body;
 
-    if (!serviceId || !date || !time || !customerName) {
+    if (!customerName || !serviceId || !date || !time) {
       return res.status(400).json({
-        message: 'Usluga, datum, vreme i ime mušterije su obavezni.'
+        message: 'Ime mušterije, usluga, datum i vreme su obavezni.'
       });
     }
 
     const serviceResult = await pool.query(
-      'SELECT duration_minutes FROM services WHERE id = $1',
+      `SELECT id, name, duration_minutes, price
+       FROM services
+       WHERE id = $1`,
       [serviceId]
     );
 
@@ -154,6 +162,9 @@ exports.createManualAppointment = async (req, res) => {
       });
     }
 
+    const service = serviceResult.rows[0];
+    const duration = Number(service.duration_minutes);
+
     const workEnd = getWorkEndByDate(date);
 
     if (!workEnd) {
@@ -161,8 +172,6 @@ exports.createManualAppointment = async (req, res) => {
         message: 'Salon ne radi nedeljom.'
       });
     }
-
-    const duration = serviceResult.rows[0].duration_minutes;
 
     const startMinutes = timeToMinutes(time);
     const endMinutes = startMinutes + duration;
@@ -186,21 +195,38 @@ exports.createManualAppointment = async (req, res) => {
       [date]
     );
 
-    const hasOverlap = bookedResult.rows.some(row => {
-      const bookedStart = timeToMinutes(row.start_time.slice(0, 5));
-      const bookedEnd = timeToMinutes(row.end_time.slice(0, 5));
+    const blocksResult = await pool.query(
+      `
+      SELECT start_time, end_time
+      FROM blocked_slots
+      WHERE block_date = $1
+      `,
+      [date]
+    );
 
+    const unavailable = [
+      ...bookedResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      })),
+      ...blocksResult.rows.map(row => ({
+        start: timeToMinutes(row.start_time.slice(0, 5)),
+        end: timeToMinutes(row.end_time.slice(0, 5))
+      }))
+    ];
+
+    const hasOverlap = unavailable.some(slot => {
       return overlaps(
         startMinutes,
         endMinutes,
-        bookedStart - BUFFER_MINUTES,
-        bookedEnd + BUFFER_MINUTES
+        slot.start - BUFFER_MINUTES,
+        slot.end + BUFFER_MINUTES
       );
     });
 
     if (hasOverlap) {
       return res.status(409).json({
-        message: 'Taj termin je već zauzet.'
+        message: 'Taj termin je već zauzet ili blokiran.'
       });
     }
 
@@ -215,12 +241,13 @@ exports.createManualAppointment = async (req, res) => {
         end_time,
         manual_customer_name,
         manual_customer_phone,
+        manual_customer_email,
         note,
         status
       )
       VALUES
       (
-        NULL, $1, $2, $3, $4, $5, $6, $7, 'booked'
+        NULL, $1, $2, $3, $4, $5, $6, $7, $8, 'booked'
       )
       RETURNING *
       `,
@@ -231,12 +258,32 @@ exports.createManualAppointment = async (req, res) => {
         minutesToTime(endMinutes),
         customerName,
         customerPhone || null,
+        customerEmail || null,
         note || null
       ]
     );
 
+    try {
+      if (customerEmail) {
+        await sendAppointmentConfirmation({
+          to: customerEmail,
+          firstName: customerName,
+          serviceName: service.name,
+          date,
+          startTime: minutesToTime(startMinutes),
+          endTime: minutesToTime(endMinutes),
+          price: service.price
+        });
+      }
+    } catch (emailError) {
+      console.error(
+        'Ručni termin je dodat, ali email mušteriji nije poslat:',
+        emailError.message
+      );
+    }
+
     res.status(201).json({
-      message: 'Termin je ručno dodat.',
+      message: 'Termin je uspešno dodat.',
       appointment: result.rows[0]
     });
 
@@ -670,6 +717,206 @@ exports.getAdminStats = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: 'Greška pri učitavanju admin statistike.'
+    });
+  }
+};
+
+exports.toggleServiceStatusByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const serviceResult = await pool.query(
+      `
+      SELECT id, is_active
+      FROM services
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (serviceResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Usluga nije pronađena.'
+      });
+    }
+
+    const currentStatus = serviceResult.rows[0].is_active;
+    const newStatus = !currentStatus;
+
+    const result = await pool.query(
+      `
+      UPDATE services
+      SET is_active = $1
+      WHERE id = $2
+      RETURNING *
+      `,
+      [newStatus, id]
+    );
+
+    res.json({
+      message: newStatus
+        ? 'Usluga je aktivirana.'
+        : 'Usluga je deaktivirana.',
+      service: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri promeni statusa usluge.'
+    });
+  }
+};
+
+exports.getSiteSettings = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT setting_key, setting_value
+      FROM site_settings
+      ORDER BY setting_key
+      `
+    );
+
+    const settings = {};
+
+    result.rows.forEach(row => {
+      settings[row.setting_key] = row.setting_value;
+    });
+
+    res.json({ settings });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri učitavanju podešavanja.'
+    });
+  }
+};
+
+exports.updateSiteSettings = async (req, res) => {
+  try {
+    const settings = req.body;
+
+    const entries = Object.entries(settings);
+
+    for (const [key, value] of entries) {
+      await pool.query(
+        `
+        INSERT INTO site_settings (setting_key, setting_value, updated_at)
+        VALUES ($1, $2, CURRENT_TIMESTAMP)
+        ON CONFLICT (setting_key)
+        DO UPDATE SET
+          setting_value = EXCLUDED.setting_value,
+          updated_at = CURRENT_TIMESTAMP
+        `,
+        [key, value]
+      );
+    }
+
+    res.json({
+      message: 'Podešavanja su sačuvana.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri čuvanju podešavanja.'
+    });
+  }
+};
+
+exports.getClosedDays = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        id,
+        TO_CHAR(start_date, 'YYYY-MM-DD') AS start_date,
+        TO_CHAR(end_date, 'YYYY-MM-DD') AS end_date,
+        reason
+      FROM closed_days
+      ORDER BY start_date DESC
+      `
+    );
+
+    res.json({
+      closedDays: result.rows
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri učitavanju neradnih dana.'
+    });
+  }
+};
+
+exports.createClosedDay = async (req, res) => {
+  try {
+    const { startDate, endDate, reason } = req.body;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        message: 'Početni i krajnji datum su obavezni.'
+      });
+    }
+
+    if (new Date(endDate) < new Date(startDate)) {
+      return res.status(400).json({
+        message: 'Krajnji datum ne može biti pre početnog.'
+      });
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO closed_days (start_date, end_date, reason)
+      VALUES ($1, $2, $3)
+      RETURNING *
+      `,
+      [startDate, endDate, reason || null]
+    );
+
+    res.status(201).json({
+      message: 'Neradni dan je dodat.',
+      closedDay: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri dodavanju neradnog dana.'
+    });
+  }
+};
+
+exports.deleteClosedDay = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      DELETE FROM closed_days
+      WHERE id = $1
+      RETURNING *
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Neradni dan nije pronađen.'
+      });
+    }
+
+    res.json({
+      message: 'Neradni dan je obrisan.'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Greška pri brisanju neradnog dana.'
     });
   }
 };

@@ -98,7 +98,7 @@ function renderUserStatus() {
     }
 
     if (mobileAdminBtn) {
-      mobileAdminBtn.style.display = role === 'admin' ? 'inline-flex' : 'none';
+      mobileAdminBtn.classList.toggle('admin-visible', role === 'admin');
     }
 
     if (mobileLogoutBtn) {
@@ -1048,7 +1048,15 @@ document.getElementById('cancelModalYes')?.addEventListener('click', async () =>
 
   const token = localStorage.getItem('don_token');
 
+  const modal = document.getElementById('cancelModal');
+  const yesBtn = document.getElementById('cancelModalYes');
+
   try {
+    if (yesBtn) {
+      yesBtn.disabled = true;
+      yesBtn.textContent = 'Otkazivanje...';
+    }
+
     const response = await fetch(`${API_URL}/appointments/${appointmentToCancel}/cancel`, {
       method: 'PATCH',
       headers: {
@@ -1063,6 +1071,12 @@ document.getElementById('cancelModalYes')?.addEventListener('click', async () =>
         data.message || 'Greška pri otkazivanju termina.',
         'error'
       );
+
+      if (yesBtn) {
+        yesBtn.disabled = false;
+        yesBtn.textContent = 'Da, otkaži termin';
+      }
+
       return;
     }
 
@@ -1070,15 +1084,28 @@ document.getElementById('cancelModalYes')?.addEventListener('click', async () =>
 
     appointmentToCancel = null;
 
-    document.getElementById('cancelModal')?.classList.remove('active');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+
+    if (yesBtn) {
+      yesBtn.disabled = false;
+      yesBtn.textContent = 'Da, otkaži termin';
+    }
 
     loadMyAppointments();
+    loadAvailableSlots();
 
   } catch (error) {
     showGlobalMessage(
       'Backend nije pokrenut ili API nije dostupan.',
       'error'
     );
+
+    if (yesBtn) {
+      yesBtn.disabled = false;
+      yesBtn.textContent = 'Da, otkaži termin';
+    }
   }
 });
 
@@ -1151,5 +1178,34 @@ document.getElementById('mobileLogoutBtn')?.addEventListener('click', () => {
   window.location.href = 'index.html';
 });
 
+async function loadPublicSettings() {
+  try {
+    const response = await fetch(`${API_URL}/settings`);
+    const data = await response.json();
+
+    if (!response.ok) return;
+
+    const settings = data.settings || {};
+
+    const phoneElements = document.querySelectorAll('[data-setting="salon_phone"]');
+    const emailElements = document.querySelectorAll('[data-setting="salon_email"]');
+    const addressElements = document.querySelectorAll('[data-setting="salon_address"]');
+    const workMfElements = document.querySelectorAll('[data-setting="work_monday_friday"]');
+    const workSatElements = document.querySelectorAll('[data-setting="work_saturday"]');
+    const workSunElements = document.querySelectorAll('[data-setting="work_sunday"]');
+
+    phoneElements.forEach(el => el.textContent = settings.salon_phone || '');
+    emailElements.forEach(el => el.textContent = settings.salon_email || '');
+    addressElements.forEach(el => el.textContent = settings.salon_address || '');
+    workMfElements.forEach(el => el.textContent = settings.work_monday_friday || '');
+    workSatElements.forEach(el => el.textContent = settings.work_saturday || '');
+    workSunElements.forEach(el => el.textContent = settings.work_sunday || '');
+
+  } catch (error) {
+    console.log('Podešavanja sajta nisu učitana.');
+  }
+}
+
 renderUserStatus();
 loadHomepageServicesCards();
+loadPublicSettings();
