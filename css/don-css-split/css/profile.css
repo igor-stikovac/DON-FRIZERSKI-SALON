@@ -1,0 +1,304 @@
+/* ======================================================
+   PROFILE PAGE
+====================================================== */
+
+.profile-page {
+  min-height: 100vh;
+  padding: 70px 90px;
+  background: #f8fafc;
+}
+
+.profile-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 25px rgba(16, 18, 37, .06);
+}
+
+.profile-card h1,
+.profile-card h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 42px;
+  margin-bottom: 24px;
+  color: var(--dark);
+}
+
+.profile-info-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding: 14px 0;
+}
+
+.profile-info-row strong {
+  color: var(--dark);
+}
+
+.profile-info-row span {
+  color: #666;
+}
+
+.appointment-card {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-2);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.appointment-card h3 {
+  margin: 0 0 10px;
+  color: var(--dark);
+}
+
+.appointment-card p {
+  margin: 6px 0;
+}
+
+.profile-hero{
+  margin-bottom:40px;
+}
+
+.profile-hero h1{
+  font-size:54px;
+  font-family:"Cormorant Garamond", serif;
+  margin-bottom:10px;
+}
+
+.profile-hero p{
+  color:#6b7280;
+}
+
+.profile-page {
+  min-height: 100vh;
+  padding: 120px 8% 80px;
+  background:
+    radial-gradient(circle at top left, rgba(196, 145, 67, 0.16), transparent 35%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2f7 45%, #ffffff 100%);
+}
+
+.profile-auth-card,
+.profile-content-block {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.profile-auth-header,
+.profile-hero-card {
+  margin-bottom: 35px;
+  padding: 42px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: #ffffff;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18);
+}
+
+.profile-auth-header h1,
+.profile-hero-card h1 {
+  font-size: 48px;
+  line-height: 1.1;
+  margin: 12px 0;
+  font-family: "Cormorant Garamond", serif;
+}
+
+.profile-auth-header p,
+.profile-hero-card p {
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 620px;
+}
+
+.profile-auth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.profile-form-card,
+.clean-profile-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 34px;
+  box-shadow: 0 20px 55px rgba(15, 23, 42, 0.11);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.profile-form-card h2,
+.clean-profile-card h2 {
+  margin-bottom: 18px;
+  font-size: 30px;
+  font-family: "Cormorant Garamond", serif;
+  color: #111827;
+}
+
+.profile-form-card form,
+.profile-edit-section {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-form-card label {
+  font-weight: 700;
+  color: #111827;
+  font-size: 14px;
+}
+
+.profile-form-card input,
+.profile-edit-section input {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  background: #f8fafc;
+  font-size: 15px;
+  outline: none;
+}
+
+.profile-form-card input:focus,
+.profile-edit-section input:focus {
+  border-color: #c49143;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(196, 145, 67, 0.16);
+}
+
+.profile-btn {
+  width: 100%;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.profile-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.profile-card-top p {
+  margin-top: 6px;
+  color: #6b7280;
+}
+
+.profile-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.profile-info-row strong {
+  color: #111827;
+}
+
+.profile-info-row span {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.profile-edit-section {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.appointment-card {
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  padding: 22px;
+  margin-bottom: 16px;
+}
+
+.appointment-card h3 {
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.appointment-card p {
+  color: #4b5563;
+  margin-bottom: 10px;
+}
+
+.cancel-fee {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(220, 38, 38, 0.08);
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.profile-appointments-group {
+  margin-bottom: 34px;
+}
+
+.profile-appointments-group > h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 30px;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.appointment-card {
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+.appointment-card h3 {
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.cancel-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+}
+
+.cancel-modal.active {
+  display: flex;
+}
+
+.cancel-modal-box {
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+}
+
+.cancel-modal-box h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 34px;
+  color: #111827;
+  margin-bottom: 14px;
+}
+
+.cancel-modal-box p {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.cancel-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cancel-modal-actions .btn {
+  flex: 1;
+  justify-content: center;
+}

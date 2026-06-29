@@ -1,333 +1,265 @@
-[
 <!DOCTYPE html>
 <html lang="sr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin panel | DON Hair Studio</title>
-
   <link rel="stylesheet" href="css/style.css">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link 
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" 
-    rel="stylesheet"
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<header class="site-header">
+  <header class="site-header">
+    <a class="logo" href="index.html#home">
+      <img src="images/logo-hed.png" alt="DON Hair Studio">
+      <div class="logo-text">
+        <span>DON</span>
+        <small>Hair Studio</small>
+      </div>
+    </a>
 
-  <a class="logo" href="index.html#home">
-    <img src="images/logo-hed.png" alt="DON Hair Studio">
+    <button class="menu-btn" id="adminMenuBtn" type="button">☰</button>
 
-    <div class="logo-text">
-      <span>DON</span>
-      <small>Hair Studio</small>
-    </div>
-  </a>
+    <nav class="nav" id="adminNavMenu">
+      <a href="index.html#home">Početna</a>
+      <a href="index.html#services">Usluge</a>
+      <a href="profile.html">Moj profil</a>
+      <div class="mobile-menu-actions">
+        <button type="button" class="mobile-logout-btn show-mobile-logout" id="adminMobileLogoutBtn">
+          Odjavi se
+        </button>
+      </div>
+    </nav>
 
-  <button class="menu-btn" id="adminMenuBtn" type="button">
-    ☰
-  </button>
-
-  <nav class="nav" id="adminNavMenu">
-    <a href="index.html#home">Početna</a>
-    <a href="index.html#services">Usluge</a>
-    <a href="profile.html">Moj profil</a>
-
-    <div class="mobile-menu-actions">
-      <button type="button" class="mobile-logout-btn show-mobile-logout" id="adminMobileLogoutBtn">
+    <div class="header-actions">
+      <button type="button" class="header-logout-btn" id="adminLogoutBtn">
         Odjavi se
       </button>
     </div>
-  </nav>
+  </header>
 
-  <div class="header-actions">
-    <button type="button" class="header-logout-btn" id="adminLogoutBtn">
-      Odjavi se
-    </button>
-  </div>
+  <main class="admin-page-v2">
 
-</header>
-
-<main class="admin-page-v2">
-
-  <section class="admin-top">
-    <div>
-      <span>DON Admin</span>
-      <h1>PREGLED TERMINA</h1>
-    </div>
-  </section>
-
-  <!-- <section class="admin-stats-grid">
-
-    <div class="admin-stat-card">
-      <span>Danas zakazano</span>
-      <strong id="statBookedToday">0</strong>
-    </div>
-
-    <div class="admin-stat-card">
-      <span>Danas otkazano</span>
-      <strong id="statCancelledToday">0</strong>
-    </div>
-
-    <div class="admin-stat-card">
-      <span>Prihod danas</span>
-      <strong id="statRevenueToday">0 RSD</strong>
-    </div>
-
-    <div class="admin-stat-card">
-      <span>Blokada danas</span>
-      <strong id="statBlocksToday">0</strong>
-    </div>
-
-  </section> -->
-
-  <section class="admin-main-grid">
-
-    <div class="admin-calendar-panel">
-
-      <div class="admin-calendar-header">
-        <button type="button" id="prevMonthBtn">‹</button>
-
-        <h2 id="adminMonthTitle">Mesec</h2>
-
-        <button type="button" id="nextMonthBtn">›</button>
+    <section class="admin-top">
+      <div>
+        <span>DON Admin</span>
+        <h1>PREGLED TERMINA</h1>
       </div>
+    </section>
 
-      <div class="admin-calendar-weekdays">
-        <span>Pon</span>
-        <span>Uto</span>
-        <span>Sre</span>
-        <span>Čet</span>
-        <span>Pet</span>
-        <span>Sub</span>
-        <span>Ned</span>
+    <!-- STATISTIKE -->
+    <section class="admin-stats-grid">
+      <div class="admin-stat-card">
+        <span>Danas zakazano</span>
+        <strong id="statBookedToday">0</strong>
       </div>
+      <div class="admin-stat-card">
+        <span>Danas otkazano</span>
+        <strong id="statCancelledToday">0</strong>
+      </div>
+      <div class="admin-stat-card">
+        <span>Prihod danas</span>
+        <strong id="statRevenueToday">0 RSD</strong>
+      </div>
+      <div class="admin-stat-card">
+        <span>Blokada danas</span>
+        <strong id="statBlocksToday">0</strong>
+      </div>
+    </section>
 
-      <div class="admin-month-grid" id="adminMonthGrid"></div>
+    <section class="admin-main-grid">
 
-    </div>
-
-    <div class="admin-day-panel">
-
-      <div class="admin-day-header">
-        <div>
-          <span>Izabrani dan</span>
-          <h2 id="selectedDayTitle">-</h2>
+      <!-- KALENDAR -->
+      <div class="admin-calendar-panel">
+        <div class="admin-calendar-header">
+          <button type="button" id="prevMonthBtn">‹</button>
+          <h2 id="adminMonthTitle">Mesec</h2>
+          <button type="button" id="nextMonthBtn">›</button>
         </div>
+
+        <div class="admin-calendar-weekdays">
+          <span>Pon</span><span>Uto</span><span>Sre</span>
+          <span>Čet</span><span>Pet</span><span>Sub</span><span>Ned</span>
+        </div>
+
+        <div class="admin-month-grid" id="adminMonthGrid"></div>
       </div>
 
-      <div class="admin-tabs">
-        <button type="button" class="admin-tab active" data-admin-tab="appointments">
-          Termini
-        </button>
+      <!-- DESNI PANEL -->
+      <div class="admin-day-panel">
 
-        <button type="button" class="admin-tab" data-admin-tab="manual">
-          Dodaj termin
-        </button>
+        <div class="admin-day-header">
+          <div>
+            <span>Izabrani dan</span>
+            <h2 id="selectedDayTitle">-</h2>
+          </div>
+        </div>
 
-        <button type="button" class="admin-tab" data-admin-tab="block">
-          Blokiraj vreme
-        </button>
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab active" data-admin-tab="appointments">Termini</button>
+          <button type="button" class="admin-tab" data-admin-tab="manual">Dodaj termin</button>
+          <button type="button" class="admin-tab" data-admin-tab="block">Blokiraj vreme</button>
+          <button type="button" class="admin-tab" data-admin-tab="services">Usluge</button>
+          <button type="button" class="admin-tab" data-admin-tab="closed">Neradni dani</button>
+          <button type="button" class="admin-tab" data-admin-tab="settings">Podešavanja</button>
+        </div>
 
-        <button type="button" class="admin-tab" data-admin-tab="services">
-          Usluge
-        </button>
+        <!-- TAB: TERMINI -->
+        <div class="admin-tab-content active" id="appointmentsTab">
+          <div id="adminAppointmentsList"></div>
+        </div>
 
-        <button type="button" class="admin-tab" data-admin-tab="closed">
-          Neradni dani
-        </button>
+        <!-- TAB: DODAJ TERMIN -->
+        <div class="admin-tab-content" id="manualTab">
+          <form id="manualAppointmentForm" class="admin-form">
+            <label>Ime mušterije</label>
+            <input type="text" id="manualCustomerName" required>
 
-        <button type="button" class="admin-tab" data-admin-tab="settings">
-          Podešavanja
-        </button>
+            <label>Telefon</label>
+            <input type="text" id="manualCustomerPhone">
 
+            <label>Email mušterije</label>
+            <input type="email" id="manualCustomerEmail" placeholder="email@example.com">
 
-      </div>
+            <label>Usluga</label>
+            <select id="manualService" required>
+              <option value="">Izaberi uslugu</option>
+            </select>
 
-      <!-- TERMINI -->
-      <div class="admin-tab-content active" id="appointmentsTab">
-        <div id="adminAppointmentsList"></div>
-      </div>
+            <label>Vreme</label>
+            <input type="time" id="manualTime" required>
 
-      <!-- PODEŠAVANJA -->
-      <div class="admin-tab-content" id="settingsTab">
+            <label>Napomena</label>
+            <textarea id="manualNote" rows="3"></textarea>
 
-        <form id="settingsForm" class="admin-form">
+            <button type="submit" class="btn btn-gold admin-submit-btn">Dodaj termin</button>
+          </form>
+        </div>
 
-          <label>Telefon salona</label>
-          <input type="text" id="settingSalonPhone">
+        <!-- TAB: BLOKIRAJ VREME -->
+        <div class="admin-tab-content" id="blockTab">
+          <form id="blockTimeForm" class="admin-form">
+            <label>Od</label>
+            <input type="time" id="blockStartTime" required>
 
-          <label>Email salona</label>
-          <input type="email" id="settingSalonEmail">
+            <label>Do</label>
+            <input type="time" id="blockEndTime" required>
 
-          <label>Adresa salona</label>
-          <input type="text" id="settingSalonAddress">
+            <label>Razlog</label>
+            <textarea id="blockReason" rows="3" placeholder="Pauza, privatna obaveza, neradan deo dana..."></textarea>
 
-          <label>Instagram link</label>
-          <input type="text" id="settingSalonInstagram">
+            <button type="submit" class="btn btn-dark admin-submit-btn">Blokiraj vreme</button>
+          </form>
+        </div>
 
-          <label>Radno vreme ponedeljak - petak</label>
-          <input type="text" id="settingWorkMondayFriday">
+        <!-- TAB: USLUGE -->
+        <div class="admin-tab-content" id="servicesTab">
+          <form id="adminServiceForm" class="admin-form">
+            <input type="hidden" id="adminServiceId">
 
-          <label>Radno vreme subota</label>
-          <input type="text" id="settingWorkSaturday">
+            <label>Naziv usluge</label>
+            <input type="text" id="adminServiceName" required>
 
-          <label>Nedelja</label>
-          <input type="text" id="settingWorkSunday">
+            <label>Trajanje u minutima</label>
+            <input type="number" id="adminServiceDuration" required>
 
-          <button type="submit" class="btn btn-gold admin-submit-btn">
-            Sačuvaj podešavanja
-          </button>
+            <label>Cena</label>
+            <input type="number" id="adminServicePrice" required>
 
-        </form>
+            <button type="submit" class="btn btn-gold admin-submit-btn">Sačuvaj uslugu</button>
+            <button type="button" class="btn btn-dark admin-submit-btn" id="clearServiceFormBtn">Očisti formu</button>
+          </form>
 
-      </div>
+          <div id="adminServicesList" class="admin-services-list"></div>
+        </div>
 
-      <!-- FORMA ZA IZMENU TERMINA -->
-      <div id="editAppointmentBox" class="admin-edit-box" style="display:none;">
+        <!-- TAB: NERADNI DANI -->
+        <div class="admin-tab-content" id="closedTab">
+          <form id="closedDayForm" class="admin-form">
+            <label>Od datuma</label>
+            <input type="date" id="closedStartDate" required>
 
-        <h3>Izmeni termin</h3>
+            <label>Do datuma</label>
+            <input type="date" id="closedEndDate" required>
 
-        <form id="editAppointmentForm" class="admin-form">
+            <label>Razlog (godišnji odmor, praznik...)</label>
+            <textarea id="closedReason" rows="3" placeholder="Godišnji odmor, državni praznik..."></textarea>
 
-          <input type="hidden" id="editAppointmentId">
+            <button type="submit" class="btn btn-dark admin-submit-btn">Dodaj neradni period</button>
+          </form>
 
-          <label>Ime mušterije</label>
-          <input type="text" id="editCustomerName">
+          <div id="closedDaysList" class="admin-services-list"></div>
+        </div>
 
-          <label>Telefon</label>
-          <input type="text" id="editCustomerPhone">
+        <!-- TAB: PODEŠAVANJA -->
+        <div class="admin-tab-content" id="settingsTab">
+          <form id="settingsForm" class="admin-form">
+            <label>Telefon salona</label>
+            <input type="text" id="settingSalonPhone">
 
-          <label>Usluga</label>
-          <select id="editService" required>
-            <option value="">Izaberi uslugu</option>
-          </select>
+            <label>Email salona</label>
+            <input type="email" id="settingSalonEmail">
 
-          <label>Datum</label>
-          <input type="date" id="editDate" required>
+            <label>Adresa salona</label>
+            <input type="text" id="settingSalonAddress">
 
-          <label>Vreme</label>
-          <input type="time" id="editTime" required>
+            <label>Instagram link</label>
+            <input type="text" id="settingSalonInstagram">
 
-          <label>Napomena</label>
-          <textarea id="editNote" rows="3"></textarea>
+            <label>Radno vreme ponedeljak – petak</label>
+            <input type="text" id="settingWorkMondayFriday" placeholder="10:00 - 20:00">
 
-          <button type="submit" class="btn btn-gold admin-submit-btn">
-            Sačuvaj izmene
-          </button>
+            <label>Radno vreme subota</label>
+            <input type="text" id="settingWorkSaturday" placeholder="10:00 - 15:00">
 
-          <button type="button" class="btn btn-dark admin-submit-btn" id="cancelEditAppointmentBtn">
-            Odustani
-          </button>
+            <label>Nedelja</label>
+            <input type="text" id="settingWorkSunday" placeholder="Neradno">
 
-        </form>
+            <button type="submit" class="btn btn-gold admin-submit-btn">Sačuvaj podešavanja</button>
+          </form>
+        </div>
 
-      </div>
+        <!-- FORMA ZA IZMENU TERMINA (skrivena, pojavljuje se klikom na Izmeni) -->
+        <div id="editAppointmentBox" class="admin-edit-box" style="display:none;">
+          <h3>Izmeni termin</h3>
+          <form id="editAppointmentForm" class="admin-form">
+            <input type="hidden" id="editAppointmentId">
 
-      <!-- RUČNO DODAVANJE TERMINA -->
-      <div class="admin-tab-content" id="manualTab">
+            <label>Ime mušterije</label>
+            <input type="text" id="editCustomerName">
 
-        <form id="manualAppointmentForm" class="admin-form">
+            <label>Telefon</label>
+            <input type="text" id="editCustomerPhone">
 
-          <label>Ime mušterije</label>
-          <input type="text" id="manualCustomerName" required>
+            <label>Usluga</label>
+            <select id="editService" required>
+              <option value="">Izaberi uslugu</option>
+            </select>
 
-          <label>Telefon</label>
-          <input type="text" id="manualCustomerPhone">
+            <label>Datum</label>
+            <input type="date" id="editDate" required>
 
-          <label>Email mušterije</label>
-          <input type="email" id="manualCustomerEmail" placeholder="email@example.com">
+            <label>Vreme</label>
+            <input type="time" id="editTime" required>
 
-          <label>Usluga</label>
-          <select id="manualService" required>
-            <option value="">Izaberi uslugu</option>
-          </select>
+            <label>Napomena</label>
+            <textarea id="editNote" rows="3"></textarea>
 
-          <label>Vreme</label>
-          <input type="time" id="manualTime" required>
+            <button type="submit" class="btn btn-gold admin-submit-btn">Sačuvaj izmene</button>
+            <button type="button" class="btn btn-dark admin-submit-btn" id="cancelEditAppointmentBtn">Odustani</button>
+          </form>
+        </div>
 
-          <label>Napomena</label>
-          <textarea id="manualNote" rows="3"></textarea>
-
-          <button type="submit" class="btn btn-gold admin-submit-btn">
-            Dodaj termin
-          </button>
-
-        </form>
-
-      </div>
-
-      <!-- BLOKIRANJE VREMENA -->
-      <div class="admin-tab-content" id="blockTab">
-
-        <form id="blockTimeForm" class="admin-form">
-
-          <label>Od</label>
-          <input type="time" id="blockStartTime" required>
-
-          <label>Do</label>
-          <input type="time" id="blockEndTime" required>
-
-          <label>Razlog</label>
-          <textarea 
-            id="blockReason" 
-            rows="3" 
-            placeholder="Pauza, privatna obaveza, neradan deo dana..."
-          ></textarea>
-
-          <button type="submit" class="btn btn-dark admin-submit-btn">
-            Blokiraj vreme
-          </button>
-
-        </form>
-
-      </div>
-
-      <!-- USLUGE -->
-      <div class="admin-tab-content" id="servicesTab">
-
-        <form id="adminServiceForm" class="admin-form">
-
-          <input type="hidden" id="adminServiceId">
-
-          <label>Naziv usluge</label>
-          <input type="text" id="adminServiceName" required>
-
-          <label>Trajanje u minutima</label>
-          <input type="number" id="adminServiceDuration" required>
-
-          <label>Cena</label>
-          <input type="number" id="adminServicePrice" required>
-
-          <button type="submit" class="btn btn-gold admin-submit-btn">
-            Sačuvaj uslugu
-          </button>
-
-          <button type="button" class="btn btn-dark admin-submit-btn" id="clearServiceFormBtn">
-            Očisti formu
-          </button>
-
-        </form>
-
-        <div id="adminServicesList" class="admin-services-list"></div>
+        <p id="adminMessage" class="auth-message"></p>
 
       </div>
+    </section>
 
-      <p id="adminMessage" class="auth-message"></p>
+  </main>
 
-    </div>
-
-  </section>
-
-</main>
-
-<script src="js/admin.js"></script>
-
+  <script src="js/admin.js"></script>
 </body>
-</html>]
-
+</html>

@@ -1,0 +1,781 @@
+/* ======================================================
+   ADMIN PANEL
+====================================================== */
+
+.admin-page {
+  min-height: 100vh;
+  padding: 130px 7% 80px;
+  background:
+    radial-gradient(circle at top left, rgba(196, 145, 67, 0.16), transparent 34%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2f7 55%, #ffffff 100%);
+}
+
+.admin-hero {
+  max-width: 1450px;
+  margin: 0 auto 40px;
+  padding: 46px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: #ffffff;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.18);
+}
+
+.admin-hero span {
+  color: #c49143;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.admin-hero h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 56px;
+  line-height: 1;
+  margin: 12px 0;
+}
+
+.admin-hero p {
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 700px;
+}
+
+.admin-layout {
+  max-width: 1450px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.admin-card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 34px;
+  box-shadow: 0 20px 55px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 26px;
+}
+
+.admin-card h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 34px;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.admin-card p,
+.admin-card-text {
+  color: #6b7280;
+}
+
+.admin-card input,
+.admin-card select,
+.admin-card textarea {
+  width: 100%;
+  padding: 14px 15px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  background: #f8fafc;
+  outline: none;
+  font-size: 15px;
+}
+
+.admin-card input:focus,
+.admin-card select:focus,
+.admin-card textarea:focus {
+  border-color: #c49143;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(196, 145, 67, 0.14);
+}
+
+.admin-form {
+  margin-top: 22px;
+  display: grid;
+  gap: 13px;
+}
+
+.admin-form label {
+  font-weight: 800;
+  color: #111827;
+  font-size: 14px;
+}
+
+.admin-submit-btn {
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.admin-appointment-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 16px;
+  background: #f8fafc;
+}
+
+.admin-appointment-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.admin-appointment-main h3 {
+  font-size: 26px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.admin-appointment-main p {
+  color: #6b7280;
+}
+
+.admin-status {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-status.booked {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+.admin-status.cancelled {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.admin-appointment-info {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.admin-appointment-info p {
+  margin: 0;
+  color: #374151;
+}
+
+.admin-cancel-btn {
+  margin-top: 8px;
+}
+
+.admin-page-v2 {
+  min-height: 100vh;
+  padding: 130px 7% 80px;
+  background:
+    radial-gradient(circle at top left, rgba(196, 145, 67, 0.14), transparent 35%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2f7 55%, #ffffff 100%);
+}
+
+.admin-top {
+  max-width: 1500px;
+  margin: 0 auto 34px;
+}
+
+.admin-top span {
+  color: #c49143;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.admin-top h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 58px;
+  color: #111827;
+  margin: 8px 0;
+}
+
+.admin-top p {
+  color: #6b7280;
+  font-size: 17px;
+}
+
+.admin-main-grid {
+  max-width: 1500px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.admin-calendar-panel,
+.admin-day-panel {
+  background: #ffffff;
+  border-radius: 30px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.admin-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.admin-calendar-header h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 38px;
+  color: #111827;
+}
+
+.admin-calendar-header button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #111827;
+  color: #ffffff;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.admin-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-calendar-weekdays span {
+  text-align: center;
+  font-weight: 900;
+  color: #6b7280;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.admin-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+}
+
+.admin-calendar-day {
+  min-height: 105px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: #f8fafc;
+  cursor: pointer;
+  padding: 14px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  transition: 0.22s ease;
+}
+
+.admin-calendar-day strong {
+  font-size: 25px;
+  color: #111827;
+}
+
+.admin-calendar-day span {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 800;
+}
+
+.admin-calendar-day:hover {
+  transform: translateY(-4px);
+  background: #ffffff;
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.12);
+}
+
+.admin-calendar-day.selected {
+  background: linear-gradient(135deg, #ef4444, #991b1b);
+  border-color: transparent;
+}
+
+.admin-calendar-day.selected strong,
+.admin-calendar-day.selected span {
+  color: #ffffff;
+}
+
+.admin-calendar-day.today {
+  border-color: #c49143;
+}
+
+.admin-calendar-day.closed-day {
+  opacity: 0.45;
+}
+
+.admin-calendar-day.empty {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: default;
+}
+
+.admin-day-header {
+  margin-bottom: 22px;
+}
+
+.admin-day-header span {
+  color: #c49143;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.admin-day-header h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 36px;
+  color: #111827;
+  margin-top: 6px;
+}
+
+.admin-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.admin-tab {
+  border: none;
+  padding: 13px 10px;
+  border-radius: 14px;
+  background: #f1f5f9;
+  color: #111827;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-tab.active {
+  background: #111827;
+  color: #ffffff;
+}
+
+.admin-tab-content {
+  display: none;
+}
+
+.admin-tab-content.active {
+  display: block;
+}
+
+.admin-form {
+  display: grid;
+  gap: 13px;
+}
+
+.admin-form label {
+  font-weight: 900;
+  color: #111827;
+  font-size: 14px;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+  width: 100%;
+  padding: 14px 15px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  background: #f8fafc;
+  outline: none;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+  border-color: #c49143;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(196, 145, 67, 0.14);
+}
+
+.admin-submit-btn {
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.admin-empty {
+  padding: 20px;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #6b7280;
+  text-align: center;
+}
+
+.admin-appointment-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 15px;
+  background: #f8fafc;
+}
+
+.admin-appointment-card.blocked {
+  background: rgba(196, 145, 67, 0.1);
+  border-color: rgba(196, 145, 67, 0.25);
+}
+
+.admin-appointment-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.admin-appointment-main h3 {
+  font-size: 24px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.admin-status {
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admin-status.blocked {
+  background: rgba(196, 145, 67, 0.2);
+  color: #8a5a14;
+}
+
+.admin-appointment-info {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.admin-main-grid {
+  grid-template-columns: 1fr 0.85fr;
+  max-width: 1350px;
+}
+
+.admin-calendar-panel {
+  padding: 24px;
+}
+
+.admin-calendar-header {
+  margin-bottom: 18px;
+}
+
+.admin-calendar-header h2 {
+  font-size: 32px;
+}
+
+.admin-calendar-header button {
+  width: 42px;
+  height: 42px;
+  font-size: 26px;
+}
+
+.admin-calendar-weekdays {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-month-grid {
+  gap: 8px;
+}
+
+.admin-calendar-day {
+  min-height: 78px;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+.admin-calendar-day strong {
+  font-size: 21px;
+}
+
+.admin-calendar-day span {
+  font-size: 11px;
+}
+
+.admin-appointment-card {
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 16px;
+}
+
+.admin-appointment-main {
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.admin-appointment-main h3 {
+  font-size: 17px;
+  margin-bottom: 2px;
+}
+
+.admin-appointment-main p {
+  font-size: 14px;
+}
+
+.admin-appointment-info {
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.admin-appointment-info p {
+  font-size: 13px;
+}
+
+.admin-status {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
+.admin-cancel-btn,
+.admin-delete-block-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  border-radius: 10px;
+}
+
+.admin-services-list {
+  margin-top: 28px;
+  display: grid;
+  gap: 14px;
+}
+
+.admin-service-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.admin-service-card h3 {
+  margin: 0 0 6px;
+  color: #111827;
+  font-size: 20px;
+}
+
+.admin-service-card p {
+  margin: 0 0 8px;
+  color: #6b7280;
+}
+
+.service-active {
+  color: #15803d;
+  font-weight: 900;
+}
+
+.service-inactive {
+  color: #b91c1c;
+  font-weight: 900;
+}
+
+.admin-service-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-service-actions .btn {
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.admin-edit-box {
+  margin-top: 24px;
+  padding: 22px;
+  border-radius: 22px;
+  background: #fff7ed;
+  border: 1px solid rgba(196, 145, 67, 0.28);
+}
+
+.admin-edit-box h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 30px;
+  color: #111827;
+  margin-bottom: 18px;
+}
+
+.admin-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.admin-card-actions .btn {
+  padding: 10px 15px;
+  font-size: 13px;
+}
+
+.admin-appointment-card,
+.admin-service-card,
+.admin-block-card {
+  background: #ffffff;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.admin-appointment-card h3,
+.admin-service-card h3,
+.admin-block-card h3 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: #111827;
+}
+
+.admin-appointment-card p,
+.admin-service-card p,
+.admin-block-card p {
+  margin: 7px 0;
+  color: #4b5563;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.admin-appointment-card strong,
+.admin-service-card strong,
+.admin-block-card strong {
+  color: #111827;
+}
+
+.admin-appointment-actions,
+.admin-service-actions,
+.admin-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.admin-appointment-actions button,
+.admin-service-actions button,
+.admin-block-actions button {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.admin-service-card.inactive,
+.admin-service-card[data-active="false"] {
+  opacity: 0.65;
+  background: #f9fafb;
+}
+
+.admin-service-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+}
+
+.admin-service-status.active {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.admin-service-status.inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.admin-empty-state {
+  padding: 28px;
+  border-radius: 22px;
+  background: #f9fafb;
+  border: 1px dashed rgba(17, 24, 39, 0.18);
+  text-align: center;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.admin-edit-box {
+  background: #ffffff;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.admin-edit-box h3 {
+  font-size: 24px;
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+.admin-appointment-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 12px;
+}
+
+.admin-appointment-status.booked {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+
+.admin-appointment-status.cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
+.admin-appointment-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.admin-appointment-card.cancelled {
+  opacity: 0.72;
+  background: #f9fafb;
+}
+
+.admin-appointment-card.cancelled h3 {
+  text-decoration: line-through;
+  color: #6b7280;
+}

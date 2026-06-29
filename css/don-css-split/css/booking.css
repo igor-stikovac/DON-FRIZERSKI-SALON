@@ -1,0 +1,268 @@
+/* ======================================================
+   BOOKING / AUTH / CALENDAR
+====================================================== */
+
+.booking-section {
+  background: var(--dark);
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 48px;
+  padding: 70px 80px;
+}
+
+.booking-info h2 {
+  text-align: left;
+  font-size: 44px;
+  color: #fff;
+}
+
+.steps-info > div {
+  display: flex;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.steps-info span {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--accent-2);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--accent-2);
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+
+.steps-info p {
+  margin: 0;
+  line-height: 1.45;
+  color: #d1d5db;
+}
+
+.booking-card {
+  background: var(--dark-2);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.booking-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.booking-tabs.two-tabs {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.tab {
+  background: transparent;
+  border: 0;
+  color: #9ca3af;
+  border-bottom: 2px solid rgba(255, 255, 255, .12);
+  padding: 12px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.tab.active {
+  color: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.booking-card input,
+.booking-card select {
+  background: #0f1224;
+  color: #fff;
+  border-color: rgba(255, 255, 255, .18);
+}
+
+.form-step {
+  display: none;
+}
+
+.form-step.active {
+  display: block;
+}
+
+.week-calendar {
+  background: linear-gradient(145deg, #0f1224, #191d38);
+  color: #fff;
+  border: 1px solid rgba(220, 38, 38, .35);
+  border-radius: 18px;
+  padding: 24px;
+  margin: 18px 0;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+  max-height: 430px;
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-header h3 {
+  margin: 0;
+  color: #fff;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 34px;
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.calendar-header button {
+  border: 0;
+  background: transparent;
+  font-size: 38px;
+  cursor: pointer;
+  color: var(--accent-2);
+  line-height: 1;
+}
+
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin: 22px 0;
+}
+
+.day-item {
+  text-align: center;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.day-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #d1d5db;
+}
+
+.day-number {
+  margin: 8px auto 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #101225;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .18);
+  font-weight: 800;
+}
+
+.day-item.selected .day-number {
+  background: var(--accent-2);
+  color: #fff;
+  border-color: var(--accent-2);
+}
+
+.calendar-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-height: 210px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.calendar-times::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calendar-times::-webkit-scrollbar-thumb {
+  background: var(--accent-2);
+  border-radius: 999px;
+}
+
+.calendar-times button {
+  min-width: 145px;
+  padding: 10px 16px;
+  font-size: 15px;
+  background: #101225;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.calendar-times button:hover {
+  border-color: var(--accent-2);
+  background: rgba(220, 38, 38, .16);
+}
+
+.calendar-times button.selected {
+  background: var(--accent-2);
+  color: #fff;
+  border-color: var(--accent-2);
+}
+
+.calendar-times button strong {
+  font-size: 15px;
+}
+
+.calendar-times button small {
+  font-size: 11px;
+  opacity: .75;
+}
+
+.booking-message {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(220, 38, 38, .12);
+  border: 1px solid rgba(220, 38, 38, .4);
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+}
+
+.auth-section {
+  padding: 55px 90px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  position: relative;
+}
+
+.auth-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 12px 25px rgba(16, 18, 37, .06);
+}
+
+.auth-card h3 {
+  text-transform: uppercase;
+  color: var(--dark);
+}
+
+.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 18px;
+}
+
+.form-row a {
+  font-size: 13px;
+  color: var(--muted);
+}

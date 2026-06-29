@@ -14,80 +14,15 @@
 
 <body>
 
-  <!-- <header class="site-header">
-    <a class="logo" href="index.html">
-      <span>DON</span>
-      <small>Hair Studio</small>
-    </a>
-
-    <nav class="nav">
-      <a href="index.html#home">Početna</a>
-      <a href="index.html#services">Usluge</a>
-      <a href="index.html#booking">Zakazivanje</a>
-      <a href="index.html#contact">Kontakt</a>
-    </nav>
-
-    <div class="header-actions">
-      <button class="btn btn-outline" id="logoutProfileBtn">Odjavi se</button>
-    </div>
-  </header> -->
-
-  <!-- <header class="site-header">
-
-    <a class="logo" href="index.html#home">
-      <img src="images/logo-hed.png" alt="DON Hair Studio">
-
-      <div class="logo-text">
-        <span>DON</span>
-        <small>Hair Studio</small>
-      </div>
-    </a>
-
-    <button class="menu-btn" id="menuBtn">☰</button>
-
-    <nav class="nav" id="navMenu">
-      <a href="index.html#home">Početna</a>
-      <a href="index.html#services">Usluge</a>
-      <a href="index.html#booking">Zakazivanje</a>
-      <a href="index.html#about">O nama</a>
-      <a href="index.html#contact">Kontakt</a>
-    </nav>
-
-    <div class="header-actions">
-
-      <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
-        ⚙️
-      </a>
-      <a href="#profileAuthBlock" class="header-login-btn" id="loginNavBtn">
-        Prijavi se
-      </a>
-
-      <a href="profile.html" class="profile-icon-btn" id="profileNavBtn" style="display:none">
-        👤
-      </a>
-
-      <button type="button" class="header-logout-btn" id="logoutProfileBtn" style="display:none">
-        Odjavi se
-      </button>
-
-      <a href="index.html#booking" class="header-booking-btn">
-        Zakaži termin
-      </a>
-
-    </div>
-
-  </header> -->
   <header class="site-header">
     <a class="logo logo-image" href="index.html">
       <img src="images/logo-hed.png" alt="DON Hair Studio">
     </a>
 
-    <button class="menu-btn" id="menuBtn" type="button">
-      ☰
-    </button>
+    <button class="menu-btn" id="menuBtn" type="button">☰</button>
 
     <nav class="nav" id="navMenu">
-      <a href="index.html#home" class="active">Početna</a>
+      <a href="index.html#home">Početna</a>
       <a href="index.html#services">Usluge</a>
       <a href="index.html#booking">Zakazivanje</a>
       <a href="index.html#about">O nama</a>
@@ -97,16 +32,13 @@
         <a href="admin.html" class="mobile-admin-link" id="mobileAdminNavBtn" style="display:none">
           ⚙️ Admin panel
         </a>
-
         <a href="profile.html" class="mobile-profile-link">
           <i class="fas fa-user"></i>
           Moj profil
         </a>
-
         <a href="index.html#booking" class="btn btn-gold mobile-booking-btn">
           Zakaži termin
         </a>
-
         <button type="button" class="mobile-logout-btn" id="mobileLogoutBtn" style="display:none">
           Odjavi se
         </button>
@@ -117,20 +49,22 @@
       <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
         ⚙️
       </a>
-
       <a href="profile.html" class="profile-link">
         <i class="fas fa-user"></i>
       </a>
-
+      <button type="button" class="header-logout-btn" id="logoutBtn" style="display:none">
+        Odjavi se
+      </button>
       <a href="index.html#booking" class="btn btn-gold">
         Zakaži termin
       </a>
     </div>
   </header>
+
   <main class="profile-page">
 
+    <!-- BLOK ZA NEPRIJAVLJENE KORISNIKE -->
     <section id="profileAuthBlock" class="profile-auth-card">
-
       <div class="profile-auth-header">
         <span class="section-tag">DON Hair Studio</span>
         <h1>Prijava na profil</h1>
@@ -141,61 +75,44 @@
 
         <div class="profile-form-card">
           <h2>Prijava</h2>
-
           <form id="profileLoginForm">
             <label>Email</label>
             <input type="text" id="profileLoginEmail" placeholder="Email ili admin korisničko ime" required>
-
             <label>Lozinka</label>
             <input type="password" id="profileLoginPassword" required>
-
-            <button type="submit" class="btn btn-gold profile-btn">
-              Prijavi se
-            </button>
+            <button type="submit" class="btn btn-gold profile-btn">Prijavi se</button>
           </form>
-
           <p id="profileLoginMessage" class="auth-message"></p>
         </div>
 
         <div class="profile-form-card">
           <h2>Registracija</h2>
-
           <form id="profileRegisterForm">
             <label>Ime</label>
             <input id="profileFirstName" required>
-
             <label>Prezime</label>
             <input id="profileLastName" required>
-
             <label>Telefon</label>
             <input id="profilePhone" required>
-
             <label>Email</label>
             <input type="email" id="profileEmail" required>
-
             <label>Lozinka</label>
             <input type="password" id="profilePassword" required>
-
-            <button type="submit" class="btn btn-dark profile-btn">
-              Napravi nalog
-            </button>
+            <button type="submit" class="btn btn-dark profile-btn">Napravi nalog</button>
           </form>
-
           <p id="profileRegisterMessage" class="auth-message"></p>
         </div>
 
       </div>
-
     </section>
 
+    <!-- BLOK ZA PRIJAVLJENE KORISNIKE -->
     <div id="profileContentBlock" class="profile-content-block" style="display:none;">
 
       <section class="profile-hero-card">
         <span class="section-tag">Moj profil</span>
         <h1 id="profileWelcomeTitle">Dobro došli</h1>
-        <p id="profileWelcomeText">
-          Ovde možete videti svoje podatke i zakazane termine.
-        </p>
+        <p id="profileWelcomeText">Ovde možete videti svoje podatke i zakazane termine.</p>
       </section>
 
       <section class="profile-card clean-profile-card">
@@ -204,23 +121,17 @@
             <h2>Lični podaci</h2>
             <p>Podaci vašeg korisničkog naloga</p>
           </div>
-
-          <button id="editProfileBtn" class="btn btn-gold">
-            Izmeni podatke
-          </button>
+          <button id="editProfileBtn" class="btn btn-gold">Izmeni podatke</button>
         </div>
 
         <div id="profileInfo"></div>
 
         <div id="editProfileSection" class="profile-edit-section" style="display:none;">
-          <input type="text" id="editFirstName" placeholder="Ime">
-          <input type="text" id="editLastName" placeholder="Prezime">
-          <input type="email" id="editEmail" placeholder="Email">
-          <input type="text" id="editPhone" placeholder="Telefon">
-
-          <button id="saveProfileBtn" class="btn btn-dark profile-btn">
-            Sačuvaj izmene
-          </button>
+          <input type="text"  id="editFirstName" placeholder="Ime">
+          <input type="text"  id="editLastName"  placeholder="Prezime">
+          <input type="email" id="editEmail"     placeholder="Email">
+          <input type="text"  id="editPhone"     placeholder="Telefon">
+          <button id="saveProfileBtn" class="btn btn-dark profile-btn">Sačuvaj izmene</button>
         </div>
       </section>
 
@@ -231,7 +142,6 @@
             <p>Pregled zakazanih i otkazanih termina</p>
           </div>
         </div>
-
         <div id="myAppointmentsList"></div>
       </section>
 
@@ -239,25 +149,18 @@
 
   </main>
 
+  <!-- MODAL ZA POTVRDU OTKAZIVANJA -->
   <div id="cancelModal" class="cancel-modal">
     <div class="cancel-modal-box">
       <h3>Otkazivanje termina</h3>
-
-      <p id="cancelModalText">
-        Da li ste sigurni da želite da otkažete termin?
-      </p>
-
+      <p id="cancelModalText">Da li ste sigurni da želite da otkažete termin?</p>
       <div class="cancel-modal-actions">
-        <button type="button" class="btn btn-dark" id="cancelModalNo">
-          Ne, odustani
-        </button>
-
-        <button type="button" class="btn btn-gold" id="cancelModalYes">
-          Da, otkaži termin
-        </button>
+        <button type="button" class="btn btn-dark" id="cancelModalNo">Ne, odustani</button>
+        <button type="button" class="btn btn-gold" id="cancelModalYes">Da, otkaži termin</button>
       </div>
     </div>
   </div>
+
   <script src="js/script.js"></script>
 </body>
 </html>

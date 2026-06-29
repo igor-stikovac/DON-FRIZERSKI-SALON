@@ -12,14 +12,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 <body>
+
   <header class="site-header">
     <a class="logo logo-image" href="#home">
       <img src="images/logo-hed.png" alt="DON Hair Studio">
     </a>
 
-    <button class="menu-btn" id="menuBtn" type="button">
-      ☰
-    </button>
+    <button class="menu-btn" id="menuBtn" type="button">☰</button>
 
     <nav class="nav" id="navMenu">
       <a href="#home" class="active">Početna</a>
@@ -32,16 +31,13 @@
         <a href="admin.html" class="mobile-admin-link" id="mobileAdminNavBtn" style="display:none">
           ⚙️ Admin panel
         </a>
-
         <a href="profile.html" class="mobile-profile-link">
           <i class="fas fa-user"></i>
           Moj profil
         </a>
-
         <a href="#booking" class="btn btn-gold mobile-booking-btn">
           Zakaži termin
         </a>
-
         <button type="button" class="mobile-logout-btn" id="mobileLogoutBtn" style="display:none">
           Odjavi se
         </button>
@@ -52,176 +48,56 @@
       <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
         ⚙️
       </a>
-
       <a href="profile.html" class="profile-link">
         <i class="fas fa-user"></i>
       </a>
-
+      <button type="button" class="header-logout-btn" id="logoutBtn" style="display:none">
+        Odjavi se
+      </button>
       <a href="#booking" class="btn btn-gold">
         Zakaži termin
       </a>
     </div>
   </header>
-  <!-- <header class="site-header">
-    <a class="logo logo-image" href="#home">
-      <img src="images/logo-hed.png" alt="DON Hair Studio">
-    </a>
-
-    <button class="menu-btn" id="menuBtn">☰</button>
-
-    <nav class="nav" id="navMenu">
-      <a href="#home" class="active">Početna</a>
-      <a href="#services">Usluge</a>
-      <a href="#booking">Zakazivanje</a>
-      <a href="#about">O nama</a>
-      <a href="#contact">Kontakt</a>
-    </nav>
-
-    <div class="header-actions">
-
-      <a href="admin.html" class="profile-icon-btn" id="adminNavBtn" style="display:none" title="Admin panel">
-        ⚙️
-      </a>
-      <a href="profile.html" class="profile-link">
-        <i class="fas fa-user"></i>
-      </a>
-
-      <a href="#booking" class="btn btn-gold">Zakaži termin</a>
-    </div>
-    
-  </header> -->
 
   <main>
+
+    <!-- HERO -->
     <section class="hero" id="home">
       <div class="hero-logo-side">
         <img src="images/logo-full.png" alt="DON Frizerski salon">
       </div>
-
       <div class="hero-copy">
         <p class="eyebrow">DON Frizerski salon</p>
-
         <h1 class="hero-title">
           PRECIZNOST.<br>
           <span>STIL.</span><br>
           KARAKTER.
         </h1>
-
         <p class="hero-text">
           Vrhunske frizerske usluge za muškarce koji znaju šta žele.
         </p>
-
         <div class="hero-buttons">
           <a href="#booking" class="btn btn-gold">Zakaži termin</a>
           <a href="#services" class="btn btn-outline">Pogledaj usluge →</a>
         </div>
       </div>
-
     </section>
 
-    <!-- <div id="welcomeBanner" class="welcome-banner"></div> -->
-
-    <!-- <section class="services section" id="services">
-      <p class="section-kicker">Naše usluge</p>
-      <h2>Usluge koje pružamo</h2>
-      <div class="line"></div>
-
-      <div class="service-grid">
-        <article class="service-card">
-          <div class="service-img img-1"></div>
-          <div class="service-icon">✂</div>
-          <h3>Muško šišanje</h3>
-          <p>Klasično i moderno šišanje po tvom stilu.</p>
-          <strong>od 1.200 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-1"></div>
-          <div class="service-icon">✂</div>
-          <h3>Muško šišanje</h3>
-          <p>Klasično i moderno šišanje po tvom stilu.</p>
-          <strong>od 1.200 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-1"></div>
-          <div class="service-icon">✂</div>
-          <h3>Muško šišanje</h3>
-          <p>Klasično i moderno šišanje po tvom stilu.</p>
-          <strong>od 1.200 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-1"></div>
-          <div class="service-icon">✂</div>
-          <h3>Muško šišanje</h3>
-          <p>Klasično i moderno šišanje po tvom stilu.</p>
-          <strong>od 1.200 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-1"></div>
-          <div class="service-icon">✂</div>
-          <h3>Muško šišanje</h3>
-          <p>Klasično i moderno šišanje po tvom stilu.</p>
-          <strong>od 1.200 RSD</strong>
-        </article>
-        
-        <article class="service-card">
-          <div class="service-img img-1"></div>
-          <div class="service-icon">✂</div>
-          <h3>Muško šišanje</h3>
-          <p>Klasično i moderno šišanje po tvom stilu.</p>
-          <strong>od 1.200 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-5"></div>
-          <div class="service-icon">〰</div>
-          <h3>Brada / Grooming</h3>
-          <p>Oblikovanje brade i kompletna nega.</p>
-          <strong>od 600 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-5"></div>
-          <div class="service-icon">〰</div>
-          <h3>Brada / Grooming</h3>
-          <p>Oblikovanje brade i kompletna nega.</p>
-          <strong>od 600 RSD</strong>
-        </article>
-
-        <article class="service-card">
-          <div class="service-img img-5"></div>
-          <div class="service-icon">〰</div>
-          <h3>Brada / Grooming</h3>
-          <p>Oblikovanje brade i kompletna nega.</p>
-          <strong>od 600 RSD</strong>
-        </article>
-      </div>
-    </section> -->
-
+    <!-- USLUGE -->
     <section id="services" class="services-section">
-
       <div class="section-header services-header-clean">
         <h2>Usluge koje pružamo</h2>
       </div>
-
       <div class="services-grid collapsed" id="servicesGrid"></div>
-
       <div class="services-more">
         <button type="button" class="btn btn-dark" id="toggleServicesBtn">
           Prikaži sve usluge
         </button>
       </div>
-
-      <!-- <div class="services-more">
-        <button class="btn btn-gold" id="toggleServicesBtn">
-          Prikaži sve usluge
-        </button>
-      </div> -->
-
     </section>
 
+    <!-- ZAKAZIVANJE -->
     <section class="booking-section" id="booking">
       <div class="booking-info">
         <p class="section-kicker">Zakaži svoj termin</p>
@@ -250,18 +126,15 @@
 
           <div class="form-step" data-step="2">
             <label>Izaberi dan i termin</label>
-
             <div class="week-calendar">
               <div class="calendar-header">
                 <button type="button" id="prevWeek">‹</button>
                 <h3 id="calendarTitle"></h3>
                 <button type="button" id="nextWeek">›</button>
               </div>
-
               <div class="week-days" id="weekDays"></div>
               <div class="calendar-times" id="timeGrid"></div>
             </div>
-
             <button type="submit" class="btn btn-gold full">Potvrdi termin</button>
           </div>
         </form>
@@ -270,57 +143,21 @@
       </div>
     </section>
 
-    <section class="auth-section" id="login">
-      <div class="auth-card">
-        <h3>Prijava</h3>
-        <form id="loginForm">
-          <label>Email adresa</label>
-          <input type="text" id="loginEmail" placeholder="Email ili admin korisničko ime" required>
-          <label>Lozinka</label>
-          <input id="loginPassword" type="password" placeholder="unesi lozinku" required />
-          <div class="form-row">
-            <a href="#">Zaboravili ste lozinku?</a>
-            <button class="btn btn-dark">Prijavi se</button>
-          </div>
-        </form>
-        <p class="auth-message" id="loginMessage"></p>
-      </div>
-
-      <div class="auth-card">
-        <h3>Registracija</h3>
-        <form id="registerForm">
-          <div class="two-cols">
-            <div><label>Ime</label><input id="firstName" placeholder="unesi ime" required /></div>
-            <div><label>Prezime</label><input id="lastName" placeholder="unesi prezime" required /></div>
-          </div>
-          <div class="two-cols">
-            <div><label>Broj telefona</label><input id="phone" placeholder="unesi broj telefona" required /></div>
-            <div><label>Email adresa</label><input id="email" type="email" placeholder="unesi email" required /></div>
-          </div>
-          <label>Lozinka</label>
-          <input id="password" type="password" placeholder="unesi lozinku" required />
-          <button class="btn btn-gold full">Napravi nalog</button>
-        </form>
-        <p class="auth-message" id="authMessage"></p>
-      </div>
-    </section>
-
-    <!-- <section class="about section" id="about">
+    <!-- O NAMA -->
+    <section class="about section" id="about">
       <div>
         <p class="section-kicker">O nama</p>
         <h2>Salon u kome stil počinje od detalja</h2>
       </div>
-      <p>DON Hair Studio je zamišljen kao premium salon sa jednostavnim online zakazivanjem. Korisnici mogu da naprave nalog, izaberu uslugu i rezervišu slobodan termin.</p>
-    </section> -->
+      <p>DON Hair Studio je premium salon sa jednostavnim online zakazivanjem. Izaberi uslugu, rezerviši slobodan termin i dobijaš potvrdu na email.</p>
+    </section>
+
   </main>
 
   <footer class="don-footer">
-
     <div class="don-footer-inner">
-
       <div class="don-footer-brand">
         <img src="images/logo-full.png" alt="DON Hair Studio">
-
         <div>
           <h2>DON Frizerski Salon</h2>
           <p>Preciznost. Stil. Karakter.</p>
@@ -336,12 +173,10 @@
             Ned: <span data-setting="work_sunday">Neradno</span>
           </strong>
         </div>
-
         <div>
           <span>Kontakt</span>
           <strong data-setting="salon_phone">+381 60 123 4567</strong>
         </div>
-
         <div>
           <span>Email</span>
           <strong data-setting="salon_email">donhairstudio@gmail.com</strong>
@@ -351,13 +186,11 @@
       <a href="index.html#booking" class="don-footer-btn">
         Zakaži termin
       </a>
-
     </div>
 
     <div class="don-footer-bottom">
       © 2026 DON Hair Studio. Sva prava zadržana.
     </div>
-
   </footer>
 
   <script src="js/script.js"></script>
